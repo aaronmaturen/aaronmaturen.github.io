@@ -1,5 +1,5 @@
 var showDoughnutChart = function(element){
-    var $element = $(element);
+    var $element = jQuery(element);
     if(!$element.data('triggered')){
         var doughnutData = [{
                 value: $element.data('level'),
@@ -19,8 +19,11 @@ var showDoughnutChart = function(element){
     }
 };
 
-$(window).load(function() {
-    $(".doughnutChart").on("inview", function() {
+jQuery(window).load(function() {
+    jQuery(".doughnutChart").on("inview", function() {
         showDoughnutChart(this);
     });
+
+    jQuery("#myName").fitText(.8);
+    jQuery("#myEmail").fitText(2.6);
 });
