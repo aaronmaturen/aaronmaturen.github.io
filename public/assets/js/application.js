@@ -16,13 +16,8 @@ var showDoughnutChart = function(element){
     });
 };
 
-var graphInitDelay = 100;
-
 $(window).load(function() {
     $(".doughnutChart").on("inview", function() {
-        var $this = $(this);
-        $this.removeClass("hidden").off("inview");
-        setTimeout(showDoughnutChart(this), graphInitDelay);
-        console.log();
+        showDoughnutChart(this);
     });
 });
