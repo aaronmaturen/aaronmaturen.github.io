@@ -23,6 +23,8 @@
     <script src="assets/js/jquery.min.js"></script>
     <script type="text/javascript" src="assets/js/smoothscroll.js"></script> 
     <script src="assets/js/Chart.js"></script>
+    <script src="assets/js/jquery.inview.js"></script>
+    <script src="assets/js/application.js"></script>
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -232,113 +234,35 @@ solution.</more></p>
 						<h5>SKILLS</h5>
 					</div>
 					<div class="col-sm-3 centered">
-						<canvas id="javascript" height="130" width="130"></canvas>
+						<canvas class="doughnutChart" data-level="80" height="130" width="130"></canvas>
 						<p>Javascript</p>
 						<br>
-						<script>
-							var doughnutData = [
-									{
-										value: 80,
-										color:"#1abc9c"
-									},
-									{
-										value : 20,
-										color : "#ecf0f1"
-									}
-								];
-								var myDoughnut = new Chart(document.getElementById("javascript").getContext("2d")).Doughnut(doughnutData);
-						</script>
 					</div>
 					<div class="col-sm-3 centered">
-						<canvas id="bootstrap" height="130" width="130"></canvas>
+						<canvas class="doughnutChart" data-level="90" height="130" width="130"></canvas>
 						<p>Bootstrap</p>
 						<br>
-						<script>
-							var doughnutData = [
-									{
-										value: 90,
-										color:"#1abc9c"
-									},
-									{
-										value : 10,
-										color : "#ecf0f1"
-									}
-								];
-								var myDoughnut = new Chart(document.getElementById("bootstrap").getContext("2d")).Doughnut(doughnutData);
-						</script>
 					</div>
 					<div class="col-sm-3 centered">
-						<canvas id="laravel" height="130" width="130"></canvas>
+						<canvas class="doughnutChart" data-level="65" height="130" width="130"></canvas>
 						<p>Laravel</p>
 						<br>
-						<script>
-							var doughnutData = [
-									{
-										value: 65,
-										color:"#1abc9c"
-									},
-									{
-										value : 35,
-										color : "#ecf0f1"
-									}
-								];
-								var myDoughnut = new Chart(document.getElementById("laravel").getContext("2d")).Doughnut(doughnutData);
-						</script>
 					</div>
 					
 					<div class="col-sm-3 col-sm-offset-3 centered">
-						<canvas id="html" height="130" width="130"></canvas>
+						<canvas class="doughnutChart" data-level="65"  height="130" width="130"></canvas>
 						<p>HTML/CSS</p>
 						<br>
-						<script>
-							var doughnutData = [
-									{
-										value: 80,
-										color:"#1abc9c"
-									},
-									{
-										value : 20,
-										color : "#ecf0f1"
-									}
-								];
-								var myDoughnut = new Chart(document.getElementById("html").getContext("2d")).Doughnut(doughnutData);
-						</script>
 					</div>
 					<div class="col-sm-3 centered">
-						<canvas id="angular" height="130" width="130"></canvas>
+						<canvas class="doughnutChart" data-level="70" height="130" width="130"></canvas>
 						<p>AngularJS</p>
 						<br>
-						<script>
-							var doughnutData = [
-									{
-										value: 70,
-										color:"#1abc9c"
-									},
-									{
-										value : 30,
-										color : "#ecf0f1"
-									}
-								];
-								var myDoughnut = new Chart(document.getElementById("angular").getContext("2d")).Doughnut(doughnutData);
-						</script>
 					</div>
 					<div class="col-sm-3 centered">
-						<canvas id="illustrator" height="130" width="130"></canvas>
+						<canvas class="doughnutChart" data-level="75" height="130" width="130"></canvas>
 						<p>PHP</p>
 						<br>
-						<script>
-							var doughnutData = [
-									{
-										value: 75,
-										color:"#1abc9c"
-									},
-									{
-										value : 25,
-										color : "#ecf0f1"
-									}
-								];
-								var myDoughnut = new Chart(document.getElementById("illustrator").getContext("2d")).Doughnut(doughnutData);
-						</script>
 					</div>
 
 			</div><!--/.row -->
