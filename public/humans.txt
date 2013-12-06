@@ -1,0 +1,17 @@
+/* TEAM */
+	Me: Aaron T. Maturen
+	Contact: aaron [at] aaronmaturen.com
+	Twitter: @atmaturen
+	From: Michigan, United States
+
+/* THANKS */
+
+	Theme: Carlos Alvarez
+	Twitter: @Alvrz_is
+	Website: http://blacktie.co
+
+/* SITE */
+	Last update:2013/12/04
+	Language: English
+	Doctype:HTML5
+	IDE: Sublime Text, Photoshop
