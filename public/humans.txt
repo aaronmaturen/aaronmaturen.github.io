@@ -6,7 +6,7 @@
 
 /* THANKS */
 
-	Theme: Carlos Alvarez
+	Name: Carlos Alvarez
 	Twitter: @Alvrz_is
 	Website: http://blacktie.co
 
