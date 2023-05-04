@@ -1,11 +1,10 @@
 /* TEAM */
 	Me: Aaron T. Maturen
-	Contact: aaron [at] aaronmaturen.com
-	Twitter: @atmaturen
+	Contact: aaronmaturen [at] gmail.com
 	From: Michigan, United States
 
 /* SITE */
-	Last update:2020/10/09
+	Last update:2022/05/04
 	Language: English
 	Doctype:HTML5
-	IDE: vim 
+	IDE: vim,vscode
