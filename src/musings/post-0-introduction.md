@@ -3,7 +3,7 @@ layout: post.njk
 title: Galatic Archives - Introduction
 description: Galatic Archives - Introduction
 date: 2025-06-08
-tags: posts
+tags: musings
 ---
 
 # Angular DataSource with SWAPI: Building the Galactic Archives - Introduction
