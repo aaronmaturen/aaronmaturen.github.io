@@ -10,7 +10,7 @@ tags: posts
 
 _In a distant corner of the development universe, where semicolons roam free and variables exist in quantum superposition until observed by a debugger, lies the challenge of efficiently displaying paginated data from remote APIs. It's a challenge as old as the web itself—or at least as old as that legacy codebase no one wants to touch._
 
-> The Cosmic Compiler once told me, "Any developer can write code that a computer understands, but only the worthy can write code that humans understand." Then it rejected my pull request for using nested ternary operators. The Compiler sees all, knows all, and has strong opinions about your variable naming conventions. It's said that when a truly elegant implementation is committed, the Compiler briefly stops judging you and instead whispers, "Acceptable." Developers spend entire careers chasing that validation.
+> The Cosmic Compiler once told me, "Any developer can write code that a computer understands, but only the worthy can write code that humans understand." Then it rejected my pull request for using nested ternary operators. The Compiler sees all, knows all, and has strong opinions about your variable naming conventions. It's said that when a truly elegant implementation is committed, the Compiler briefly stops judging you and instead whispers, "Acceptable." Developers spend entire careers chasing that validation
 
 ## The Problem with Paginated Data
 
