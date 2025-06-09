@@ -1,0 +1,112 @@
+/**
+ * Custom overrides for Tufte CSS
+ */
+
+/* Breadcrumbs styling */
+.tw-breadcrumbs {
+  margin-bottom: 1.5rem;
+  font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD",
+    "Book Antiqua", Georgia, serif;
+}
+
+.tw-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tw-breadcrumbs li {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 1rem;
+  margin-top: 3.75px;
+}
+
+.tw-breadcrumbs li:not(:last-child)::after {
+  content: "/";
+  margin: 0 0.5rem;
+  color: #888;
+  display: inline-block;
+}
+
+/* Fix page layout - balance margins */
+body {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 70% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Fix content width constraints */
+section > p,
+section > footer,
+section > table,
+section > ul,
+section > ol,
+section > dl,
+blockquote p,
+blockquote footer,
+p,
+ul,
+ol,
+dl {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Adjust article padding */
+article {
+  padding: 2rem 0 !important;
+}
+
+/* Fix margin notes positioning */
+.marginnote,
+.sidenote {
+  margin-right: -30% !important;
+}
+
+/* Fix code block width issues */
+pre > code {
+  width: 100% !important;
+  margin-left: 0 !important;
+  padding: 1em !important;
+  border-radius: 4px;
+}
+
+pre[class*="language-"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto;
+  margin: 1.5em 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Make code blocks full width on all screen sizes */
+@media (max-width: 760px) {
+  pre > code {
+    width: 100% !important;
+  }
+}
+
+/* Ensure pre elements are full width */
+pre {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Improve inline code styling */
+:not(pre) > code[class*="language-"] {
+  padding: 0.1em 0.3em;
+  border-radius: 0.3em;
+  white-space: normal;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  pre[class*="language-"] {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
