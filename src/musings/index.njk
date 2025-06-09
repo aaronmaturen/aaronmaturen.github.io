@@ -1,0 +1,27 @@
+---
+layout: base.njk
+title: Musings | Aaron T. Maturen
+---
+
+<header>
+  <h1>Musings</h1>
+  <p class="subtitle">Thoughts, ideas, and explorations</p>
+</header>
+
+<main>
+  <section>
+    {% if collections.posts %}
+      {% for post in collections.posts | reverse %}
+        <article>
+          <h2><a href="{{ post.url }}">{{ post.data.title }}</a></h2>
+          <p class="subtitle">{{ post.date | date }}</p>
+          {% if post.data.description %}
+            <p>{{ post.data.description }}</p>
+          {% endif %}
+        </article>
+      {% endfor %}
+    {% else %}
+      <p>No posts yet. Check back soon!</p>
+    {% endif %}
+  </section>
+</main>

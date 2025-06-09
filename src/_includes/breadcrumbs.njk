@@ -1,0 +1,26 @@
+{% set breadcrumbs = page.url | splitPath %}
+{% set currentPath = '' %}
+
+{% if page.url != "/" %}
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+    {% for crumb in breadcrumbs %}
+      {% if crumb != '' %}
+        {% set currentPath = currentPath + '/' + crumb %}
+        <li>
+          {% if loop.last %}
+            <span aria-current="page">{{ crumb | replace('-', ' ') | capitalize }}</span>
+          {% elseif crumb == 'musings' %}
+            <a href="{{ currentPath }}">Musings</a>
+          {% else %}
+            <a href="{{ currentPath }}">{{ crumb | replace('-', ' ') | capitalize }}</a>
+          {% endif %}
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ol>
+</nav>
+{% endif %}

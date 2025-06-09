@@ -1,0 +1,19 @@
+---
+layout: base.njk
+---
+
+<header>
+  <h1>{{ title }}</h1>
+  <p class="subtitle">{{ date | date }}</p>
+</header>
+
+<main>
+  <article>
+    {{ content | safe }}
+  </article>
+  
+  <section>
+    <hr>
+    <p><a href="/musings/">← Back to all musings</a></p>
+  </section>
+</main>

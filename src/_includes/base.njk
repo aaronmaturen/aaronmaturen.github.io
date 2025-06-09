@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="{{ description | default('Aaron T. Maturen - Web Developer') }}" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>{{ title | default('Aaron T. Maturen') }}</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+    {% if page.url.includes('/resume/') %}
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet" />
+    {% endif %}
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <article>
+      {% include "breadcrumbs.njk" %}
+      {% block content %}
+        {{ content | safe }}
+      {% endblock %}
+    </article>
+  </body>
+</html>
