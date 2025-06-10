@@ -1,14 +1,20 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - Basic Project Setup"
-description: "Setting up the foundation for our Angular project with the right tools and structure"
-date: 2025-06-02
-tags: ["angular", "project-setup", "step-1-basic-project-setup"]
+layout: post.njk
+title: "Galactic Archives - Basic Project Setup"
+description: "Creating a new Angular project with Angular CLI, configuring essential dependencies, and setting up the initial project structure for scalability"
+date: 2025-06-01
+tags:
+  - project-setup
+  - angular-cli
+  - npm
+  - dependencies
+  - angular
+  - scaffolding
 seriesId: galactic-archives
 part: 1
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-1
 ---
 
@@ -211,8 +217,8 @@ Update the HTML template:
   <footer class="tw-bg-gray-900 tw-text-white tw-p-4 tw-mt-auto">
     <div class="tw-container tw-mx-auto tw-text-center">
       <p>
-        © {% raw %}{{ getCurrentYear() }}{% endraw %} Galactic Archives | Built
-        with Angular by the Rebel Alliance
+        © {{ getCurrentYear() }} Galactic Archives | Built with Angular by the
+        Rebel Alliance
       </p>
     </div>
   </footer>

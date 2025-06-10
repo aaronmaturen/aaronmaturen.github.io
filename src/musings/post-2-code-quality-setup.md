@@ -1,15 +1,20 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - Code Quality Setup"
-description: "Implementing code quality tools to maintain consistency and prevent bugs"
-date: 2025-06-03
+layout: post.njk
+title: "Galactic Archives - Code Quality Setup"
+description: "Implementing ESLint, Prettier, and Husky pre-commit hooks to enforce consistent code style and catch errors before they reach production"
+date: 2025-06-02
 tags:
-  ["angular", "code-quality", "eslint", "prettier", "step-2-code-quality-setup"]
+  - eslint
+  - prettier
+  - linting
+  - code-quality
+  - angular
+  - husky
 seriesId: galactic-archives
 part: 2
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-2
 ---
 

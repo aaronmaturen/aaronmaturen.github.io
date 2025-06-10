@@ -1,20 +1,26 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Pagination"
-description: "Adding pagination to our Star Wars character table using Angular Material's MatPaginator"
-date: 2025-06-09
-tags: ["angular", "pagination", "material", "step-8-implementing-pagination"]
+layout: post.njk
+title: "Galactic Archives - Implementing Pagination"
+description: "Building client and server-side pagination with infinite scrolling and virtual scrolling techniques for large Star Wars datasets"
+date: 2025-06-08
+tags:
+  - pagination
+  - infinite-scroll
+  - virtual-scroll
+  - angular
+  - cdk
+  - star-wars
 seriesId: galactic-archives
 part: 8
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-8
 ---
 
 # Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Pagination
 
-_The Cosmic Compiler once observed that data without pagination is like a library without shelves - technically functional but practically unusable. As our collection of galactic characters grows, we need a more sophisticated way to present and navigate through them._
+*The Cosmic Compiler once observed that data without pagination is like a library without shelves - technically functional but practically unusable. As our collection of galactic characters grows, we need a more sophisticated way to present and navigate through them.*
 
 ## From Cards to Tables: A Galactic Upgrade
 
@@ -44,26 +50,19 @@ First, let's update our imports to include the necessary Material modules:
 
 ```typescript
 // src/app/features/star-wars/components/character-list/character-list.component.ts
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  ViewChild,
-  AfterViewInit,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { MatTableModule, MatTable } from "@angular/material/table";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatPaginatorModule, MatPaginator } from "@angular/material/paginator";
-import { MatIconModule } from "@angular/material/icon";
-import { StarWarsService } from "../../../../core/services/star-wars.service";
-import { GalacticDataSource } from "../../datasources/galactic.datasource";
-import { Character } from "../../../../core/models/character.interface";
-import { Subscription } from "rxjs";
+import { Component, OnInit, OnDestroy, inject, ViewChild, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
+import { StarWarsService } from '../../../../core/services/star-wars.service';
+import { GalacticDataSource } from '../../datasources/galactic-datasource';
+import { Character } from '../../../../models/character.model';
+import { Subscription } from 'rxjs';
 ```
 
 Notice we've added several new imports:
-
 - `MatTableModule` and `MatTable` for our table component
 - `MatPaginatorModule` and `MatPaginator` for pagination
 - `AfterViewInit` interface since we'll need to access the paginator after view initialization
@@ -72,17 +71,16 @@ Notice we've added several new imports:
 > The Cosmic Compiler once remarked, "A component without proper imports is like a Jedi without a lightsaber - technically present but practically useless." Always double-check your imports before wondering why your component isn't working!
 
 @Component({
-selector: 'app-character-list',
-standalone: true,
-imports: [
-CommonModule,
-MatTableModule,
-MatProgressSpinnerModule,
-MatPaginatorModule,
-MatIconModule
-],
-
-````
+  selector: 'app-character-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+    MatIconModule
+  ],
+```
 
 Here we're setting up our component as a standalone component with the necessary imports. This follows the modern Angular approach of using standalone components rather than NgModules for better tree-shaking and more explicit dependencies.
 
@@ -91,36 +89,48 @@ Now let's look at the template where most of the magic happens:
 ```typescript
   template: `
     <div class="tw-container tw-mx-auto tw-p-4">
-      <h1 class="tw-text-2xl tw-font-bold tw-mb-4">Galactic Archives: Character Database</h1>
+      <h1 data-testid="character-list-heading" class="tw-text-2xl tw-font-bold tw-mb-4">
+        Galactic Archives: Character Database
+      </h1>
 
       <!-- Loading indicator -->
-      <div *ngIf="loading" class="tw-flex tw-justify-center tw-my-8">
+      <div *ngIf="loading && !characters.length" class="tw-flex tw-justify-center tw-my-8">
         <mat-spinner diameter="50"></mat-spinner>
       </div>
 
       <!-- Error message display -->
-      <div *ngIf="error" class="tw-bg-red-100 tw-border-l-4 tw-border-red-500 tw-text-red-700 tw-p-4 tw-mb-4">
+      <div
+        *ngIf="error"
+        data-testid="error-message"
+        class="tw-bg-red-100 tw-border-l-4 tw-border-red-500 tw-text-red-700 tw-p-4 tw-mb-4"
+      >
         {{ error }}
       </div>
-````
+```
 
 We start with a container for our component, a title, and handling for loading and error states. Notice we're using Tailwind CSS classes with the `tw-` prefix as per our project standards.
 
 Next comes the table implementation:
 
 ```typescript
-      <div class="tw-bg-gray-900 tw-rounded-lg tw-overflow-hidden tw-shadow-lg">
+      <!-- Table container with Star Wars theme -->
+      <div class="tw-bg-white tw-rounded-lg tw-overflow-hidden tw-shadow-lg">
         <!-- The MatTable with our DataSource -->
-        <table mat-table [dataSource]="dataSource" class="tw-w-full">
+        <table mat-table [dataSource]="dataSource" class="tw-w-full" data-testid="character-table">
           <!-- Name Column -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef class="tw-text-yellow-400">
+            <th mat-header-cell *matHeaderCellDef class="tw-text-blue-700">
               <div class="tw-flex tw-items-center">
-                <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">person</mat-icon>
+                <mat-icon class="tw-mr-1 tw-text-base tw-text-blue-700">person</mat-icon>
                 <span>NAME</span>
               </div>
             </th>
-            <td mat-cell *matCellDef="let character" class="tw-text-yellow-400 tw-font-medium">
+            <td
+              mat-cell
+              *matCellDef="let character"
+              class="tw-text-black tw-font-medium"
+              data-testid="character-name"
+            >
               {{ character.name }}
             </td>
           </ng-container>
@@ -133,9 +143,9 @@ Let's continue with the remaining columns:
 ```typescript
           <!-- Gender Column -->
           <ng-container matColumnDef="gender">
-            <th mat-header-cell *matHeaderCellDef class="tw-text-yellow-400">
+            <th mat-header-cell *matHeaderCellDef class="tw-text-blue-700">
               <div class="tw-flex tw-items-center">
-                <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">wc</mat-icon>
+                <mat-icon class="tw-mr-1 tw-text-base tw-text-blue-700">wc</mat-icon>
                 <span>GENDER</span>
               </div>
             </th>
@@ -144,9 +154,9 @@ Let's continue with the remaining columns:
 
           <!-- Birth Year Column -->
           <ng-container matColumnDef="birth_year">
-            <th mat-header-cell *matHeaderCellDef class="tw-text-yellow-400">
+            <th mat-header-cell *matHeaderCellDef class="tw-text-blue-700">
               <div class="tw-flex tw-items-center">
-                <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">cake</mat-icon>
+                <mat-icon class="tw-mr-1 tw-text-base tw-text-blue-700">cake</mat-icon>
                 <span>BIRTH YEAR</span>
               </div>
             </th>
@@ -155,9 +165,9 @@ Let's continue with the remaining columns:
 
           <!-- Height Column -->
           <ng-container matColumnDef="height">
-            <th mat-header-cell *matHeaderCellDef class="tw-text-yellow-400">
+            <th mat-header-cell *matHeaderCellDef class="tw-text-blue-700">
               <div class="tw-flex tw-items-center">
-                <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">height</mat-icon>
+                <mat-icon class="tw-mr-1 tw-text-base tw-text-blue-700">height</mat-icon>
                 <span>HEIGHT</span>
               </div>
             </th>
@@ -178,43 +188,54 @@ Now we need to define how rows should be rendered:
           <tr class="tw-mat-row" *matNoDataRow>
             <td class="tw-mat-cell tw-p-4 tw-text-center" colspan="4">
               <div class="tw-flex tw-flex-col tw-items-center tw-py-8">
-                <mat-icon class="tw-text-4xl tw-text-gray-500 tw-mb-2">sentiment_very_dissatisfied</mat-icon>
+                <mat-icon class="tw-text-4xl tw-text-gray-500 tw-mb-2"
+                  >sentiment_very_dissatisfied</mat-icon
+                >
                 <span class="tw-text-gray-500">No characters found in the archives</span>
               </div>
             </td>
           </tr>
         </table>
-```
 
-The `*matHeaderRowDef` and `*matRowDef` directives tell Angular how to render the header and data rows. We also include a special template for when there's no data to display.
+        <!-- Loading indicator for when data is loading but we have existing data -->
+        <div *ngIf="loading && characters.length" class="tw-flex tw-justify-center tw-py-4">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
 
-Finally, we add the paginator:
-
-```typescript
-        <!-- Pagination control -->
+        <!-- Paginator with Star Wars theme -->
         <mat-paginator
-          [length]="totalCharacters"
+          [length]="totalCount"
           [pageSize]="pageSize"
-          [pageSizeOptions]="[5, 10, 20]"
-          aria-label="Select page of characters">
-        </mat-paginator>
+          [pageSizeOptions]="[5, 10, 25]"
+          aria-label="Select page of characters"
+          class="tw-bg-gray-100 tw-border-t tw-border-gray-200"
+        ></mat-paginator>
       </div>
     </div>
   `,
-  styles: [`
-    .mat-mdc-row:nth-child(even) {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
+  styles: [
+    `
+      .mat-mdc-row:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
 
-    .mat-mdc-row:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+      .mat-mdc-row:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
 
-    .mat-mdc-cell, .mat-mdc-header-cell {
-      color: rgba(255, 255, 255, 0.7);
-      padding: 16px;
-    }
-  `]
+      .mat-mdc-cell,
+      .mat-mdc-header-cell {
+        color: #000000;
+        padding: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .mat-mdc-header-cell {
+        background-color: rgba(0, 0, 0, 0.03);
+        font-weight: 600;
+      }
+    `,
+  ]
 })
 ```
 
@@ -227,41 +248,48 @@ Now let's look at the component class implementation:
 ```typescript
 export class CharacterListComponent implements OnInit, AfterViewInit, OnDestroy {
   // Properties for our table and pagination
-  dataSource: GalacticDataSource;
+  characters: Character[] = [];
   displayedColumns: string[] = ['name', 'gender', 'birth_year', 'height'];
-  totalCharacters = 0;
   pageSize = 10;
   loading = false;
   error = '';
+  totalCount = 0;
 
   // Reference to the paginator in our template
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  // For managing all our subscriptions
-  private subscriptions = new Subscription();
-
-  constructor(private starWarsService: StarWarsService) {
-    // Create our DataSource instance
-    this.dataSource = new GalacticDataSource(this.starWarsService);
-  }
+  // Services and DataSource
+  private starWarsService = inject(StarWarsService);
+  dataSource!: GalacticDataSource; // Using definite assignment assertion
+  private subscription = new Subscription();
 
   ngOnInit(): void {
-    // Subscribe to loading state from our DataSource
-    this.subscriptions.add(
+    // Create our DataSource instance
+    this.dataSource = new GalacticDataSource(this.starWarsService);
+
+    // Subscribe to character data changes
+    this.subscription.add(
+      this.dataSource.connect().subscribe(characters => {
+        this.characters = characters;
+      })
+    );
+
+    // Subscribe to loading state
+    this.subscription.add(
       this.dataSource.loading$.subscribe(isLoading => {
         this.loading = isLoading;
       })
     );
 
-    // Subscribe to count to determine total characters
-    this.subscriptions.add(
+    // Subscribe to count
+    this.subscription.add(
       this.dataSource.count$.subscribe(count => {
-        this.totalCharacters = count;
+        this.totalCount = count;
       })
     );
 
-    // Initial data load
-    this.loadCharacters();
+    // Initial data load - start with page 1 and current page size
+    this.loadCharacters(1, this.pageSize);
   }
 ```
 
@@ -272,16 +300,27 @@ In `ngOnInit()`, we set up subscriptions to our DataSource's observables. This i
 
 We also trigger the initial data load.
 
+> The Council of Patterns warns: "Never access ViewChild references in ngOnInit() - they are undefined until the view is initialized. Many a padawan has fallen into this trap, leading to the dreaded 'undefined' errors in the console."
+
 ```typescript
   ngAfterViewInit(): void {
-    // Connect paginator to the dataSource
-    this.subscriptions.add(
-      this.paginator.page.subscribe(event => {
-        // Convert from 0-based to 1-based pagination for the API
-        const apiPage = event.pageIndex + 1;
-        this.loadCharacters(apiPage, event.pageSize);
-      })
-    );
+    // Connect paginator to our datasource after view init
+    if (this.paginator) {
+      // Handle paginator events
+      this.subscription.add(
+        this.paginator.page.subscribe(event => {
+          // Convert from 0-based to 1-based pagination for the API
+          const apiPage = event.pageIndex + 1;
+          this.loadCharacters(apiPage, event.pageSize);
+        })
+      );
+    }
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscriptions when the component is destroyed
+    this.subscription.unsubscribe();
+    // The DataSource will handle its own cleanup in disconnect()
   }
 ```
 
@@ -291,6 +330,9 @@ The `ngAfterViewInit()` lifecycle hook runs after Angular has fully initialized 
 
 ```typescript
   ngOnDestroy(): void {
+    // Clean up subscriptions when the component is destroyed
+    this.subscription.unsubscribe();
+    // The DataSource will handle its own cleanup in disconnect()
     // Clean up subscriptions
     this.subscriptions.unsubscribe();
   }
@@ -304,8 +346,7 @@ The `ngOnDestroy()` method is our cleanup phase. By unsubscribing from all subsc
     try {
       // Update the page size if it changed
       this.pageSize = pageSize;
-
-      // Tell our DataSource to load the characters for this page and page size
+      // Let the DataSource handle loading the data
       this.dataSource.loadCharacters(page, pageSize);
     } catch (error) {
       this.error = `Failed to load characters: ${error instanceof Error ? error.message : 'Unknown error'}. The Cosmic Compiler is displeased.`;
@@ -321,14 +362,21 @@ Now, let's enhance our GalacticDataSource to handle pagination properly. We'll b
 First, let's look at the imports and state management:
 
 ```typescript
-// src/app/features/star-wars/datasources/galactic.datasource.ts
+// src/app/features/star-wars/datasources/galactic-datasource.ts
 import { DataSource } from '@angular/cdk/collections';
-import { BehaviorSubject, Observable, finalize } from 'rxjs';
-import { Character } from '../../../core/models/character.interface';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { Character } from '../../../models/character.model';
 import { StarWarsService } from '../../../core/services/star-wars.service';
 
+/**
+ * GalacticDataSource - A DataSource implementation for Star Wars characters
+ *
+ * As the Ancient Order of Angular foretold, "The DataSource shall liberate thy components
+ * from the burden of data management, allowing them to focus on their true purpose."
+ */
 export class GalacticDataSource extends DataSource<Character> {
-  // Internal subjects to manage state
+  // BehaviorSubjects to manage internal state
   private charactersSubject = new BehaviorSubject<Character[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(false);
   private countSubject = new BehaviorSubject<number>(0);
@@ -339,7 +387,10 @@ export class GalacticDataSource extends DataSource<Character> {
   public loading$ = this.loadingSubject.asObservable();
   public count$ = this.countSubject.asObservable();
   public page$ = this.pageSubject.asObservable();
-  public pageSize$ = this.pageSizeSubject.asObservable(); // Expose page size observable
+  public pageSize$ = this.pageSizeSubject.asObservable();
+
+  // Track active subscriptions for cleanup
+  private subscription = new Subscription();
 ```
 
 The key addition here is the `pageSubject` which tracks the current page. This allows components to react to page changes and enables features like "current page" indicators. We expose this as a public observable `page$` that components can subscribe to.
@@ -353,16 +404,25 @@ Next, let's look at the constructor and required DataSource methods:
     super();
   }
 
+  /**
+   * Connect function that's called by the table to retrieve a stream of data
+   * The Cosmic Compiler demands a proper implementation of this abstract method
+   */
   connect(): Observable<Character[]> {
     return this.charactersSubject.asObservable();
   }
 
+  /**
+   * Disconnect function that's called when the table is destroyed
+   * The Council of Patterns insists on proper cleanup to prevent memory leaks
+   */
   disconnect(): void {
     this.charactersSubject.complete();
     this.loadingSubject.complete();
     this.countSubject.complete();
     this.pageSubject.complete();
-    this.pageSizeSubject.complete(); // Complete page size subject to prevent memory leaks
+    this.pageSizeSubject.complete();
+    this.subscription.unsubscribe();
   }
 ```
 
@@ -372,12 +432,11 @@ Now for the most important part - loading data with pagination:
 
 ```typescript
   /**
-   * Load characters from the API with pagination
-   * @param page The page number to load (1-based for SWAPI)
+   * Load characters from the Star Wars API
+   * @param page The page number to load (1-based)
    * @param pageSize The number of items per page
-   * @param filter Optional filter term
    */
-  loadCharacters(page: number = 1, pageSize: number = this.pageSizeSubject.value, filter: string = ''): void {
+  loadCharacters(page: number = 1, pageSize: number = this.pageSizeSubject.value): void {
     this.loadingSubject.next(true);
     this.pageSubject.next(page);
     this.pageSizeSubject.next(pageSize);
@@ -385,24 +444,34 @@ Now for the most important part - loading data with pagination:
     // Log the request parameters for debugging
     console.log(`Loading characters: page=${page}, pageSize=${pageSize}`);
 
-    // Always replace data when using pagination
+    // Clear current data when loading new page
     this.charactersSubject.next([]);
 
-    const request$ = filter
-      ? this.starWarsService.searchCharacters(filter)
-      : this.starWarsService.getCharacters(page, pageSize);
+    const request = this.starWarsService
+      .getCharacters(page, pageSize)
+      .pipe(finalize(() => this.loadingSubject.next(false)));
 
-    request$.pipe(
-      finalize(() => this.loadingSubject.next(false))
-    ).subscribe({
-      next: (response) => {
-        this.charactersSubject.next(response.results);
-        this.countSubject.next(response.count);
+    const subscription = request.subscribe({
+      next: response => {
+        // Update our subjects with the new data
+        this.charactersSubject.next(
+          response.results
+            .map(item => item.properties)
+            .filter((char): char is Character => char !== undefined)
+        );
+        this.countSubject.next(response.total_records);
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading characters:', error);
-      }
+        this.charactersSubject.next([]);
+        this.countSubject.next(0);
+        // Keep the current page and page size values to allow retry
+        this.loadingSubject.next(false);
+      },
     });
+
+    // Add to our subscription for cleanup
+    this.subscription.add(subscription);
   }
 ```
 
@@ -464,14 +533,26 @@ To fully support pagination with dynamic page sizes, we need to update our StarW
 
 ```typescript
 // src/app/core/services/star-wars.service.ts
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { Character, CharacterListItem } from '../../models/character.model';
+import { ApiResponse, ApiDetailResponse } from '../../models/api-response.model';
+
+// Type aliases for our specific use cases
+type CharacterResponse = ApiResponse<CharacterListItem>;
+type CharacterDetailResponse = ApiDetailResponse<Character>;
+
 @Injectable({
-  providedIn: "root", // The Ancient Order approves of this modern injection approach
+  providedIn: 'root', // The Ancient Order approves of this modern injection approach
 })
 export class StarWarsService {
   private apiUrl = environment.apiUrl;
   private http = inject(HttpClient);
 
-  // Fetch all characters with optional pagination and page size
+  // Fetch all characters with optional pagination
   getCharacters(page = 1, pageSize = 10): Observable<CharacterResponse> {
     // The Cosmic Compiler demands proper URL formatting
     const url = `${this.apiUrl}people?page=${page}&limit=${pageSize}&expanded=true`;
@@ -510,19 +591,29 @@ The MatPaginator emits events when the user changes the page or page size. We su
 
 ```typescript
 ngAfterViewInit(): void {
-  // Connect paginator to the dataSource
-  this.paginator.page.subscribe(() => {
-    this.loadCharacters();
-  });
+  if (this.paginator) {
+    this.subscription.add(
+      this.paginator.page.subscribe(event => {
+        const apiPage = event.pageIndex + 1; // Convert from 0-based to 1-based for API
+        this.loadCharacters(apiPage, event.pageSize);
+      })
+    );
+  }
 }
 ```
 
 The `page` event contains valuable information:
-
 - `pageIndex`: The current page index (0-based)
 - `pageSize`: The number of items per page
 - `length`: The total number of items
 - `previousPageIndex`: The previous page index
+
+Notice a few important details in our implementation:
+
+1. We check if `this.paginator` exists before trying to subscribe to it
+2. We add the subscription to our composite `subscription` object for proper cleanup
+3. We convert from the 0-based index used by Angular Material to the 1-based index used by our API
+4. We pass both the page and page size to our `loadCharacters` method
 
 By subscribing to this event, we create a reactive system where any user interaction with the paginator automatically triggers a data reload with the appropriate parameters.
 
@@ -531,22 +622,28 @@ By subscribing to this event, we create a reactive system where any user interac
 Unlike infinite scroll implementations where we append new data to existing data, with pagination we replace the entire dataset on each page change:
 
 ```typescript
-loadCharacters(page: number = 1, filter: string = ''): void {
+loadCharacters(page: number = 1, pageSize: number = this.pageSizeSubject.value): void {
   this.loadingSubject.next(true);
   this.pageSubject.next(page);
-
-  // Always replace data when using pagination
+  this.pageSizeSubject.next(pageSize);
   this.charactersSubject.next([]);
 
-  // ... rest of the method
+  const request = this.starWarsService
+    .getCharacters(page, pageSize)
+    .pipe(finalize(() => this.loadingSubject.next(false)));
+
+  const subscription = request.subscribe({...});
+  this.subscription.add(subscription);
 }
 ```
 
 This replacement approach has several benefits:
 
-1. **Memory efficiency**: We only keep the current page in memory
-2. **Simpler state management**: No need to track which items belong to which page
-3. **Consistent with user expectations**: Users expect to see only the current page's data
+1. **Memory efficiency**: We only keep the current page in memory, which is especially important when dealing with potentially large datasets
+2. **Simpler state management**: No need to track which items belong to which page or maintain complex caching logic
+3. **Consistent with user expectations**: Users expect to see only the current page's data when using a paginated interface
+4. **Cleaner UI transitions**: By clearing the data before loading new data, we avoid showing stale data during page transitions
+5. **Better error handling**: If an error occurs during loading, we don't have a mix of old and new data
 
 > The Cosmic Compiler once witnessed a developer trying to implement pagination by keeping all pages in memory and just showing/hiding rows. It promptly crashed the developer's IDE and left a single error message: "The path to efficient pagination is not through hiding, but through loading only what is needed."
 
@@ -555,11 +652,14 @@ This replacement approach has several benefits:
 Our implementation includes several accessibility features:
 
 1. The paginator has an `aria-label` that describes its purpose
-2. Table headers use proper `scope="col"` attributes
-3. The loading spinner provides visual feedback during page transitions
-4. Error messages are clearly displayed when issues occur
+2. We've added `data-testid` attributes to key elements for better testing and automation
+3. The loading spinner provides visual feedback during page transitions with different states:
+   - Full-screen spinner when no data is available
+   - Smaller spinner at the bottom when changing pages with existing data
+4. Error messages are clearly displayed when issues occur with appropriate styling
+5. Proper color contrast in our UI elements using our branding colors
 
-These considerations ensure that our galactic database is usable by all beings across the universe, regardless of their abilities or the assistive technologies they might be using.
+These considerations ensure that our galactic database is usable by all beings across the universe, regardless of their abilities or the assistive technologies they might be using. The Ancient Order of Angular has always emphasized that accessibility is not an afterthought but a fundamental aspect of good application design.
 
 ## Testing Our Paginated Table
 
@@ -578,19 +678,73 @@ Navigate to `http://localhost:4200` and you should see:
 
 Try clicking through different pages and changing the page size. Notice how the DataSource handles these interactions smoothly, updating the display and maintaining the correct state.
 
+### Automated Testing
+
+We've added `data-testid` attributes to key elements to make our component easier to test. Here's a simple test that verifies our pagination functionality:
+
+```typescript
+describe('CharacterListComponent', () => {
+  let component: CharacterListComponent;
+  let fixture: ComponentFixture<CharacterListComponent>;
+  let mockStarWarsService: jasmine.SpyObj<StarWarsService>;
+
+  beforeEach(async () => {
+    mockStarWarsService = jasmine.createSpyObj('StarWarsService', ['getCharacters']);
+
+    await TestBed.configureTestingModule({
+      imports: [CharacterListComponent, MatPaginatorModule, MatTableModule],
+      providers: [
+        { provide: StarWarsService, useValue: mockStarWarsService }
+      ]
+    }).compileComponents();
+
+    mockStarWarsService.getCharacters.and.returnValue(of({
+      results: [{ uid: '1', properties: { name: 'Luke Skywalker', gender: 'male' } }],
+      total_records: 82
+    }));
+
+    fixture = TestBed.createComponent(CharacterListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should load characters and update pagination', () => {
+    expect(mockStarWarsService.getCharacters).toHaveBeenCalledWith(1, 10);
+    expect(component.totalCount).toBe(82);
+
+    // Simulate page change
+    const paginator = fixture.debugElement.query(By.directive(MatPaginator));
+    const paginatorComponent = paginator.componentInstance;
+    paginatorComponent.pageIndex = 1;
+    paginatorComponent.page.emit({ pageIndex: 1, pageSize: 10, length: 82 });
+
+    expect(mockStarWarsService.getCharacters).toHaveBeenCalledWith(2, 10);
+  });
+});
+```
+
+This test verifies that:
+1. The component loads characters on initialization
+2. The pagination information is correctly updated
+3. Page changes trigger new API calls with the correct parameters
+
 ## Cosmic Compiler Summary
 
 - We've **transitioned from cards to a MatTable** for a more structured data display
 - We've **added MatPaginator** to enable navigation through large datasets
 - We've **updated our DataSource** to handle pagination properly with dynamic page sizes
-- We've **enhanced our StarWarsService** to accept page size parameters
-- We've **implemented reactive page size tracking** with BehaviorSubjects
-- We've **handled the conversion** between 0-based and 1-based pagination
-- We've **managed loading states** to provide feedback during page transitions
+- We've **enhanced our StarWarsService** to accept page and limit parameters
+- We've **implemented reactive state tracking** with multiple BehaviorSubjects for characters, loading state, count, page, and page size
+- We've **handled the conversion** between 0-based UI pagination and 1-based API pagination
+- We've **managed loading states** to provide feedback during page transitions with different spinner placements
 - We've **added proper error handling** to gracefully handle API failures
+- We've **implemented proper subscription management** to prevent memory leaks
+- We've **added data-testid attributes** to improve testability
 
 > The Council of Patterns once decreed: "A table without pagination is merely a list with delusions of grandeur." The Cosmic Compiler, ever the enforcer of good practices, has been known to mysteriously increase build times for applications that ignore this wisdom.
 
-_In our next transmission, we'll enhance our table further by adding sorting capabilities. We'll implement client-side sorting for our data, allowing users to organize the Galactic Archives by various attributes like name, height, or birth year. The Ancient Order of Angular teaches that a well-organized archive is the mark of a civilized application._
+*In our next transmission, we'll enhance our table further by adding sorting capabilities. We'll implement sorting for our data, allowing users to organize the Galactic Archives by various attributes like name, height, or birth year. We'll explore both client-side and server-side sorting approaches and discuss the trade-offs. The Ancient Order of Angular teaches that a well-organized archive is the mark of a civilized application.*
 
-_May your tables be paginated and your users never reach the dreaded "page 404"._
+*Remember that the full source code for this project is available in the Galactic Archives repository. The Council of Patterns recommends studying the implementation details, particularly how we've structured the DataSource class to handle both pagination and upcoming sorting functionality.*
+
+*May your tables be paginated, your data sources be clean, and your users never reach the dreaded "page 404".*

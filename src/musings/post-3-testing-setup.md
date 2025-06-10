@@ -1,14 +1,20 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - Testing Setup with Jest and Playwright"
-description: "Setting up Jest for unit tests and Playwright for end-to-end testing in our Angular application"
-date: 2025-06-04
-tags: ["angular", "testing", "jest", "playwright", "step-3-testing-setup"]
+layout: post.njk
+title: "Galactic Archives - Testing Setup"
+description: "Configuring Jest for unit testing and Playwright for E2E testing with custom reporters and CI integration for the Angular app"
+date: 2025-06-03
+tags:
+  - testing
+  - jest
+  - playwright
+  - e2e
+  - angular
+  - test-coverage
 seriesId: galactic-archives
 part: 3
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-3
 ---
 

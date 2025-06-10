@@ -1,22 +1,20 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - API Mocking with MSW"
-description: "Setting up Mock Service Worker (MSW) for API mocking in our Angular application"
-date: 2025-06-09
+layout: post.njk
+title: "Galactic Archives - API Mocking with MSW"
+description: "Implementing Mock Service Worker (MSW) to intercept and mock SWAPI requests for reliable testing and development without API rate limits"
+date: 2025-06-06
 tags:
-  [
-    "angular",
-    "testing",
-    "msw",
-    "api-mocking",
-    "step-6-api-mocking-msw",
-    "angular-18",
-  ]
+  - msw
+  - api-mocking
+  - testing
+  - angular
+  - service-worker
+  - star-wars
 seriesId: galactic-archives
 part: 6
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-6
 ---
 

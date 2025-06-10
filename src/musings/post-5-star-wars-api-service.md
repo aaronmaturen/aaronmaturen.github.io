@@ -1,14 +1,20 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - Star Wars API Service"
-description: "Creating a service to interact with the Star Wars API (SWAPI)"
-date: 2025-06-06
-tags: ["angular", "api", "swapi", "http", "step-5-star-wars-api-service"]
+layout: post.njk
+title: "Galactic Archives - Star Wars API Service"
+description: "Building a robust HTTP client service with TypeScript interfaces to interact with SWAPI endpoints and handle API response transformations"
+date: 2025-06-05
+tags:
+  - http-client
+  - api-service
+  - typescript
+  - interfaces
+  - angular
+  - star-wars
 seriesId: galactic-archives
 part: 5
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-5
 ---
 

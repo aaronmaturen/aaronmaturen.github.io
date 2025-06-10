@@ -1,14 +1,20 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - DataSource Foundation"
-description: "Implementing the DataSource pattern for efficient data management in Angular Material tables"
-date: 2025-06-08
-tags: ["angular", "datasource", "material", "step-7-datasource-foundation"]
+layout: post.njk
+title: "Galactic Archives - Datasource"
+description: "Creating a custom Angular DataSource implementation with reactive state management to handle complex Star Wars API data flows"
+date: 2025-06-01
+tags:
+  - datasource
+  - rxjs
+  - state-management
+  - angular
+  - typescript
+  - star-wars
 seriesId: galactic-archives
 part: 7
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-7
 ---
 

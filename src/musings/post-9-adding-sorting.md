@@ -1,14 +1,26 @@
 ---
 layout: post.njk
-title: Adding Sorting Capabilities
-description: Implementing client-side sorting with MatSort in our Angular DataSource
-date: 2025-06-08
-tags: angular, datasource, sorting, material
+title: "Galactic Archives - Adding Sorting"
+description: "Implementing multi-column sorting functionality with custom comparators for complex Star Wars data types and server-side sort integration"
+date: 2025-06-09
+tags:
+  - sorting
+  - angular-material
+  - matSort
+  - comparators
+  - star-wars
+  - angular
+seriesId: galactic-archives
+part: 9
+github:
+  org: aaronmaturen
+  repo: galactic-archives
+  tag: post-9
 ---
 
 # Angular DataSource with SWAPI: Building the Galactic Archives - Adding Sorting Capabilities
 
-*In the vast expanse of the Galactic Archives, chaos reigns when data lacks order. As any seasoned Imperial data analyst knows, the difference between finding a specific Jedi's record in seconds versus hours comes down to one critical feature: sorting. Today, we'll bring order to our galaxy of data.*
+_In the vast expanse of the Galactic Archives, chaos reigns when data lacks order. As any seasoned Imperial data analyst knows, the difference between finding a specific Jedi's record in seconds versus hours comes down to one critical feature: sorting. Today, we'll bring order to our galaxy of data._
 
 ## The Unsorted Galaxy Problem
 
@@ -30,17 +42,23 @@ Let's start by updating our component imports to include the necessary sorting m
 
 ```typescript
 // src/app/features/star-wars/components/character-list/character-list.component.ts
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
-import { MatSortModule, MatSort } from '@angular/material/sort'; // Add this import
-import { MatIconModule } from '@angular/material/icon';
-import { StarWarsService } from '../../../../core/services/star-wars.service';
-import { GalacticDataSource } from '../../datasources/galactic.datasource';
-import { Character } from '../../../../core/models/character.interface';
-import { Subscription } from 'rxjs';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  AfterViewInit,
+} from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { MatTableModule } from "@angular/material/table";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatPaginatorModule, MatPaginator } from "@angular/material/paginator";
+import { MatSortModule, MatSort } from "@angular/material/sort"; // Add this import
+import { MatIconModule } from "@angular/material/icon";
+import { StarWarsService } from "../../../../core/services/star-wars.service";
+import { GalacticDataSource } from "../../datasources/galactic.datasource";
+import { Character } from "../../../../core/models/character.interface";
+import { Subscription } from "rxjs";
 ```
 
 Notice we've added `MatSortModule` and `MatSort` to our imports. The module provides the directives needed for sorting, while the `MatSort` class gives us a reference to the sorting state.
@@ -66,12 +84,14 @@ Next, we need to update our component's metadata to include the new module:
 Now, let's add a `ViewChild` reference to capture the `MatSort` instance from our template:
 
 ```typescript
-export class CharacterListComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CharacterListComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
   // Existing properties...
-  
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort; // Add this line
-  
+
   // Rest of the component...
 }
 ```
@@ -88,7 +108,7 @@ Now we need to update our template to include the sorting directives. This invol
 Here's how we update our table element:
 
 ```html
-<table mat-table [dataSource]="dataSource" matSort class="tw-w-full">
+<table mat-table [dataSource]="dataSource" matSort class="tw-w-full"></table>
 ```
 
 The `matSort` directive tells Angular Material that this table should support sorting. Next, we need to update each column header that we want to be sortable. Let's modify our name column as an example:
@@ -96,13 +116,24 @@ The `matSort` directive tells Angular Material that this table should support so
 ```html
 <!-- Name Column -->
 <ng-container matColumnDef="name">
-  <th mat-header-cell *matHeaderCellDef mat-sort-header class="tw-text-yellow-400">
+  <th
+    mat-header-cell
+    *matHeaderCellDef
+    mat-sort-header
+    class="tw-text-yellow-400"
+  >
     <div class="tw-flex tw-items-center">
-      <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">person</mat-icon>
+      <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400"
+        >person</mat-icon
+      >
       <span>NAME</span>
     </div>
   </th>
-  <td mat-cell *matCellDef="let character" class="tw-text-yellow-400 tw-font-medium">
+  <td
+    mat-cell
+    *matCellDef="let character"
+    class="tw-text-yellow-400 tw-font-medium"
+  >
     {{ character.name }}
   </td>
 </ng-container>
@@ -113,7 +144,12 @@ Notice the addition of `mat-sort-header` to the `th` element. This transforms ou
 ```html
 <!-- Gender Column -->
 <ng-container matColumnDef="gender">
-  <th mat-header-cell *matHeaderCellDef mat-sort-header class="tw-text-yellow-400">
+  <th
+    mat-header-cell
+    *matHeaderCellDef
+    mat-sort-header
+    class="tw-text-yellow-400"
+  >
     <div class="tw-flex tw-items-center">
       <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">wc</mat-icon>
       <span>GENDER</span>
@@ -124,7 +160,12 @@ Notice the addition of `mat-sort-header` to the `th` element. This transforms ou
 
 <!-- Birth Year Column -->
 <ng-container matColumnDef="birth_year">
-  <th mat-header-cell *matHeaderCellDef mat-sort-header class="tw-text-yellow-400">
+  <th
+    mat-header-cell
+    *matHeaderCellDef
+    mat-sort-header
+    class="tw-text-yellow-400"
+  >
     <div class="tw-flex tw-items-center">
       <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">cake</mat-icon>
       <span>BIRTH YEAR</span>
@@ -135,9 +176,16 @@ Notice the addition of `mat-sort-header` to the `th` element. This transforms ou
 
 <!-- Height Column -->
 <ng-container matColumnDef="height">
-  <th mat-header-cell *matHeaderCellDef mat-sort-header class="tw-text-yellow-400">
+  <th
+    mat-header-cell
+    *matHeaderCellDef
+    mat-sort-header
+    class="tw-text-yellow-400"
+  >
     <div class="tw-flex tw-items-center">
-      <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400">height</mat-icon>
+      <mat-icon class="tw-mr-1 tw-text-base tw-text-yellow-400"
+        >height</mat-icon
+      >
       <span>HEIGHT</span>
     </div>
   </th>
@@ -165,7 +213,7 @@ ngAfterViewInit(): void {
         }
       })
     );
-    
+
     // Merge sort and paginator events to reload data
     this.subscription.add(
       merge(this.sort.sortChange, this.paginator.page)
@@ -194,7 +242,7 @@ We've also updated our `loadCharacters` method to pass the sort information to o
 
 ```typescript
 loadCharacters(
-  page: number = 1, 
+  page: number = 1,
   pageSize: number = this.pageSize,
   sortField: string = '',
   sortDirection: string = ''
@@ -231,15 +279,15 @@ First, let's update the method signature and implementation:
  * @param pageSize The number of items per page
  */
 loadCharacters(
-  page: number = 1, 
-  sortField: string = '', 
-  sortDirection: string = '', 
+  page: number = 1,
+  sortField: string = '',
+  sortDirection: string = '',
   pageSize: number = this.pageSizeSubject.value
 ): void {
   this.loadingSubject.next(true);
   this.pageSubject.next(page);
   this.pageSizeSubject.next(pageSize);
-  
+
   // Update sort state
   if (sortField) {
     this.sortSubject.next({ active: sortField, direction: sortDirection as 'asc' | 'desc' });
@@ -261,10 +309,10 @@ loadCharacters(
       const characters = response.results
         .map(item => item.properties)
         .filter((char): char is Character => char !== undefined);
-      
+
       // Apply client-side sorting if needed
       const sortedCharacters = this.applySorting(characters);
-      
+
       // Update our subjects with the new data
       this.charactersSubject.next(sortedCharacters);
       this.countSubject.next(response.total_records);
@@ -302,18 +350,18 @@ private applySorting(characters: Character[]): Character[] {
   return [...characters].sort((a, b) => {
     const sortField = sort.active;
     const sortDirection = sort.direction === 'asc' ? 1 : -1;
-    
+
     // Handle nested properties (not needed for current model but included for extensibility)
     const getPropertyValue = (obj: any, path: string) => {
       return path.split('.').reduce((prev, curr) => {
         return prev ? prev[curr] : null;
       }, obj);
     };
-    
+
     // Get values to compare
     let valueA = getPropertyValue(a, sortField);
     let valueB = getPropertyValue(b, sortField);
-    
+
     // Handle special cases for our data types
     if (sortField === 'height' || sortField === 'mass') {
       // Convert to numbers for numeric comparison, handling 'unknown' values
@@ -324,7 +372,7 @@ private applySorting(characters: Character[]): Character[] {
       valueA = valueA === 'unknown' ? -99999 : parseFloat(valueA);
       valueB = valueB === 'unknown' ? -99999 : parseFloat(valueB);
     }
-    
+
     // Compare the values
     if (valueA < valueB) {
       return -1 * sortDirection;
@@ -353,38 +401,40 @@ While our sorting functionality works, we want to make the sort headers more vis
 We can add these styles to our component:
 
 ```typescript
-styles: [`
+styles: [
+  `
   .mat-mdc-row:nth-child(even) {
     background-color: rgba(255, 255, 255, 0.05);
   }
-  
+
   .mat-mdc-row:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
-  
+
   .mat-mdc-cell, .mat-mdc-header-cell {
     color: rgba(255, 255, 255, 0.7);
     padding: 16px;
   }
-  
+
   /* Custom sort header styles */
   .mat-sort-header-container {
     align-items: center;
   }
-  
+
   .mat-sort-header-arrow {
     color: #fbbf24 !important; /* tw-yellow-400 */
   }
-  
+
   th.mat-header-cell.mat-sort-header:hover {
     background-color: rgba(251, 191, 36, 0.1); /* tw-yellow-400 with opacity */
     cursor: pointer;
   }
-  
+
   th.mat-header-cell.mat-sort-header-sorted {
     background-color: rgba(251, 191, 36, 0.15); /* tw-yellow-400 with opacity */
   }
-`]
+`,
+];
 ```
 
 These styles do several important things:
@@ -402,18 +452,21 @@ To ensure our sorting works correctly, we should test it with different data typ
 
 ```typescript
 // src/app/features/star-wars/components/character-list/character-list.component.spec.ts
-it('should sort data when sort header is clicked', () => {
+it("should sort data when sort header is clicked", () => {
   // Arrange
   const fixture = TestBed.createComponent(CharacterListComponent);
   const component = fixture.componentInstance;
-  const dataSourceSpy = spyOn(component.dataSource, 'loadCharacters').and.callThrough();
+  const dataSourceSpy = spyOn(
+    component.dataSource,
+    "loadCharacters"
+  ).and.callThrough();
   fixture.detectChanges();
-  
+
   // Act - simulate sort event
-  const sortHeader = fixture.debugElement.query(By.css('th.mat-sort-header'));
-  sortHeader.triggerEventHandler('click', {});
+  const sortHeader = fixture.debugElement.query(By.css("th.mat-sort-header"));
+  sortHeader.triggerEventHandler("click", {});
   fixture.detectChanges();
-  
+
   // Assert
   expect(dataSourceSpy).toHaveBeenCalled();
   expect(component.paginator.pageIndex).toBe(0); // Should reset to first page
@@ -421,6 +474,7 @@ it('should sort data when sort header is clicked', () => {
 ```
 
 This test verifies that:
+
 1. Clicking a sort header triggers the `loadCharacters` method
 2. The paginator resets to the first page when sorting changes
 
@@ -430,21 +484,22 @@ Unit tests are great for verifying component logic, but we also need to ensure o
 
 ```typescript
 // e2e/sorting.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Character List Sorting', () => {
+test.describe("Character List Sorting", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the character list page
-    await page.goto('/characters');
-    
+    await page.goto("/characters");
+
     // Wait for the table to be visible
-    await page.waitForSelector('table', { timeout: 30000 });
+    await page.waitForSelector("table", { timeout: 30000 });
   });
 
-  test('should sort characters by name', async ({ page }) => {
+  test("should sort characters by name", async ({ page }) => {
     // Get the initial order of character names
-    const initialNames = await page.$$eval('table tbody tr td:first-child', elements => 
-      elements.map(el => el.textContent?.trim())
+    const initialNames = await page.$$eval(
+      "table tbody tr td:first-child",
+      (elements) => elements.map((el) => el.textContent?.trim())
     );
 
     // Click on the name column header to sort
@@ -454,8 +509,9 @@ test.describe('Character List Sorting', () => {
     await page.waitForTimeout(1000);
 
     // Get the sorted order of character names
-    const sortedNames = await page.$$eval('table tbody tr td:first-child', elements => 
-      elements.map(el => el.textContent?.trim())
+    const sortedNames = await page.$$eval(
+      "table tbody tr td:first-child",
+      (elements) => elements.map((el) => el.textContent?.trim())
     );
 
     // Verify the names are in alphabetical order
@@ -463,10 +519,11 @@ test.describe('Character List Sorting', () => {
     expect(sortedNames).toEqual(sortedCopy.sort());
   });
 
-  test('should sort characters by height', async ({ page }) => {
+  test("should sort characters by height", async ({ page }) => {
     // Get the initial order of character heights
-    const initialHeights = await page.$$eval('table tbody tr td:nth-child(4)', elements => 
-      elements.map(el => el.textContent?.trim())
+    const initialHeights = await page.$$eval(
+      "table tbody tr td:nth-child(4)",
+      (elements) => elements.map((el) => el.textContent?.trim())
     );
 
     // Click on the height column header to sort
@@ -476,13 +533,15 @@ test.describe('Character List Sorting', () => {
     await page.waitForTimeout(1000);
 
     // Extract numeric values for comparison (remove 'cm' and convert to numbers)
-    const getNumericHeight = (h: string | undefined) => parseFloat(h?.replace('cm', '') || '0');
-    
+    const getNumericHeight = (h: string | undefined) =>
+      parseFloat(h?.replace("cm", "") || "0");
+
     // Get the sorted heights after clicking the header
-    const sortedHeights = await page.$$eval('table tbody tr td:nth-child(4)', elements => 
-      elements.map(el => el.textContent?.trim())
+    const sortedHeights = await page.$$eval(
+      "table tbody tr td:nth-child(4)",
+      (elements) => elements.map((el) => el.textContent?.trim())
     );
-    
+
     // Verify the heights are in ascending numeric order
     const currentHeights = sortedHeights.map(getNumericHeight);
     const sortedCopy = [...currentHeights].sort((a, b) => a - b);
@@ -492,6 +551,7 @@ test.describe('Character List Sorting', () => {
 ```
 
 These tests verify that:
+
 1. Clicking on the name column header sorts the names alphabetically
 2. Clicking on the height column header sorts the heights numerically
 3. The sorting works correctly for both string and numeric data
@@ -507,8 +567,8 @@ To ensure our sorting works with real API calls, we need to update our mock hand
 ```typescript
 // src/mocks/handlers.ts
 // Get sort parameters if they exist
-const sortField = url.searchParams.get('sort_by');
-const sortDirection = url.searchParams.get('sort_direction');
+const sortField = url.searchParams.get("sort_by");
+const sortDirection = url.searchParams.get("sort_direction");
 
 // Sort the characters if sort parameters are provided
 let sortedCharacters = [...characters];
@@ -517,17 +577,17 @@ if (sortField && sortDirection) {
     // Use type assertion to handle property access
     const aValue = a.properties[sortField as keyof typeof a.properties];
     const bValue = b.properties[sortField as keyof typeof b.properties];
-    
+
     // Handle numeric sorting
     if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-      return sortDirection === 'asc' 
-        ? Number(aValue) - Number(bValue) 
+      return sortDirection === "asc"
+        ? Number(aValue) - Number(bValue)
         : Number(bValue) - Number(aValue);
     }
-    
+
     // Handle string sorting
-    return sortDirection === 'asc' 
-      ? String(aValue).localeCompare(String(bValue)) 
+    return sortDirection === "asc"
+      ? String(aValue).localeCompare(String(bValue))
       : String(bValue).localeCompare(String(aValue));
   });
 }
@@ -549,16 +609,16 @@ getCharacters(
     .set('page', page.toString())
     .set('limit', limit.toString())
     .set('expanded', 'true');
-    
+
   // Add sort parameters if provided
   if (sortField) {
     params = params.set('sort_by', sortField);
   }
-  
+
   if (sortDirection) {
     params = params.set('sort_direction', sortDirection);
   }
-  
+
   return this.http.get<ApiResponse<Character>>(`${this.apiUrl}people`, { params });
 }
 ```
@@ -568,23 +628,23 @@ Finally, we update our `GalacticDataSource` to pass the sorting parameters to th
 ```typescript
 // src/app/features/star-wars/datasources/galactic-datasource.ts
 loadCharacters(
-  page: number = 1, 
-  sortField: string = '', 
-  sortDirection: string = '', 
+  page: number = 1,
+  sortField: string = '',
+  sortDirection: string = '',
   pageSize: number = this.pageSizeSubject.value
 ): void {
   this.loadingSubject.next(true);
   this.pageSubject.next(page);
   this.pageSizeSubject.next(pageSize);
-  
+
   if (sortField) {
     this.sortSubject.next({ active: sortField, direction: sortDirection as 'asc' | 'desc' });
   }
-  
+
   const request = this.starWarsService
     .getCharacters(page, pageSize, sortField, sortDirection)
     .pipe(finalize(() => this.loadingSubject.next(false)));
-  
+
   // Handle the response...
 }
 ```

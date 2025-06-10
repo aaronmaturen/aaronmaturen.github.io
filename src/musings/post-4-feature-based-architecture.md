@@ -1,20 +1,20 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - Feature-Based Architecture"
-description: "Implementing a scalable feature-based architecture for our Angular application"
-date: 2025-06-05
+layout: post.njk
+title: "Galactic Archives - Feature-Based Architecture"
+description: "Organizing Angular code with feature modules, smart/dumb component patterns, and lazy loading for optimal performance and maintainability"
+date: 2025-06-04
 tags:
-  [
-    "angular",
-    "architecture",
-    "feature-modules",
-    "step-4-feature-based-architecture",
-  ]
+  - architecture
+  - feature-modules
+  - lazy-loading
+  - angular
+  - project-structure
+  - best-practices
 seriesId: galactic-archives
 part: 4
 github:
   org: aaronmaturen
-  repo: galactic-archive
+  repo: galactic-archives
   tag: post-4
 ---
 

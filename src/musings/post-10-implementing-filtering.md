@@ -1,14 +1,26 @@
 ---
-layout: post
-title: "Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Advanced Filtering"
-description: "Adding powerful filtering capabilities to our Star Wars character table"
-date: 2025-06-11
-tags: ["angular", "filtering", "material", "step-10-implementing-filtering"]
+layout: post.njk
+title: "Galactic Archives - Implementing Filtering"
+description: "Building advanced search filters with dynamic query parameters to filter Star Wars characters by species, homeworld, and other attributes"
+date: 2025-06-10
+tags:
+  - filtering
+  - search
+  - query-parameters
+  - angular
+  - reactive-forms
+  - star-wars
+seriesId: galactic-archives
+part: 10
+github:
+  org: aaronmaturen
+  repo: galactic-archives
+  tag: post-10
 ---
 
 # Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Advanced Filtering
 
-*In the vastness of the galactic archives, finding specific information without proper filtering is like searching for a specific grain of sand on Tatooine. As our collection of character data grows, we need more sophisticated ways to sift through it all.*
+_In the vastness of the galactic archives, finding specific information without proper filtering is like searching for a specific grain of sand on Tatooine. As our collection of character data grows, we need more sophisticated ways to sift through it all._
 
 > The Cosmic Compiler once remarked that a table without filtering is merely a static display of data, not much different from ancient scrolls carved in stone. "True power," it whispered, "comes from giving users control over what they see."
 
@@ -36,14 +48,16 @@ First, we'll add a search input above our table:
       matInput
       [formControl]="searchControl"
       placeholder="Search by name, gender, etc."
-      aria-label="Search characters">
+      aria-label="Search characters"
+    />
     <mat-icon matPrefix class="tw-mr-2 tw-text-yellow-400">search</mat-icon>
     <button
       *ngIf="searchControl.value"
       matSuffix
       mat-icon-button
       aria-label="Clear"
-      (click)="clearSearch()">
+      (click)="clearSearch()"
+    >
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
@@ -51,6 +65,7 @@ First, we'll add a search input above our table:
 ```
 
 This search input uses Angular Material's `mat-form-field` with a few key features:
+
 - A search icon prefix using `matPrefix`
 - A clear button that appears only when there's text in the input
 - Proper ARIA labels for accessibility
@@ -100,7 +115,7 @@ Don't forget to import the ReactiveFormsModule in your component:
 imports: [
   // ... other imports
   ReactiveFormsModule,
-]
+];
 ```
 
 ## Updating the DataSource
@@ -158,29 +173,29 @@ loadCharacters(page: number = 1, sortField: string = '', sortDirection: string =
     next: (response) => {
       let characters: Character[] = [];
       let totalCount = 0;
-      
+
       // Handle different response structures for search vs regular queries
       if ('result' in response && Array.isArray(response.result)) {
         // Search response structure
         characters = response.result
           .map(item => item.properties)
           .filter((char): char is Character => char !== undefined);
-          
+
         totalCount = characters.length;
       } else if ('results' in response && Array.isArray(response.results)) {
         // Regular response structure
         characters = response.results
           .map(item => item.properties)
           .filter((char): char is Character => char !== undefined);
-          
+
         totalCount = response.total_records || 0;
       }
-      
+
       // Apply client-side sorting if sort parameters are provided
       if (sortField && sortDirection) {
         characters = this.sortData(characters, sortField, sortDirection);
       }
-      
+
       this.charactersSubject.next(characters);
       this.countSubject.next(totalCount);
     },
@@ -239,15 +254,18 @@ To ensure our filtering works correctly, we should add a test:
 
 ```typescript
 // src/app/features/star-wars/components/character-list/character-list.component.spec.ts
-it('should filter data when search input changes', fakeAsync(() => {
+it("should filter data when search input changes", fakeAsync(() => {
   // Arrange
   const fixture = TestBed.createComponent(CharacterListComponent);
   const component = fixture.componentInstance;
-  const dataSourceSpy = spyOn(component.dataSource, 'loadCharacters').and.callThrough();
+  const dataSourceSpy = spyOn(
+    component.dataSource,
+    "loadCharacters"
+  ).and.callThrough();
   fixture.detectChanges();
 
   // Act - simulate search input
-  component.searchControl.setValue('Luke');
+  component.searchControl.setValue("Luke");
   tick(300); // Wait for debounce time
   fixture.detectChanges();
 
@@ -257,11 +275,12 @@ it('should filter data when search input changes', fakeAsync(() => {
 
   // Check that the last call included the search term
   const lastCall = dataSourceSpy.calls.mostRecent();
-  expect(lastCall.args[3]).toBe('Luke'); // The 4th argument should be the filter term
+  expect(lastCall.args[3]).toBe("Luke"); // The 4th argument should be the filter term
 }));
 ```
 
 This test verifies that:
+
 1. Changing the search input triggers the `loadCharacters` method
 2. The paginator resets to the first page when filtering changes
 3. The search term is correctly passed to the DataSource
@@ -271,7 +290,10 @@ This test verifies that:
 Let's add some visual feedback to show when filtering is active:
 
 ```html
-<div class="tw-mb-2 tw-flex tw-justify-between tw-items-center" *ngIf="searchControl.value">
+<div
+  class="tw-mb-2 tw-flex tw-justify-between tw-items-center"
+  *ngIf="searchControl.value"
+>
   <span class="tw-text-yellow-400">
     <mat-icon class="tw-align-middle tw-mr-1">filter_list</mat-icon>
     Filtering results for "{{ searchControl.value }}"
