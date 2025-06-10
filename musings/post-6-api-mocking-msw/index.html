@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Setting up Mock Service Worker (MSW) for API mocking in our Angular application" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Angular DataSource with SWAPI: Building the Galactic Archives - API Mocking with MSW</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 6 api mocking msw</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - API Mocking with MSW</h1>
+  <p class="subtitle">June 9, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-6" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-6" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - API Mocking with MSW</h1>
+<p><em>In the vast expanse of web development, there exists a paradox: to test your API integration thoroughly, you must first disconnect from the API entirely. This is not some mystical teaching from the Ancient Order of Angular, but a practical reality when your tests need to run reliably in CI/CD pipelines, offline environments, and parallel universes where the SWAPI servers might be temporarily offline. With MSW and Angular 18, we now have even more powerful tools at our disposal.</em></p>
+<h2>The Dependency Dilemma</h2>
+<p>When testing applications that rely on external APIs, we face several challenges:</p>
+<ol>
+<li>External APIs can be unreliable or rate-limited</li>
+<li>Network requests slow down tests significantly</li>
+<li>Testing edge cases and error states is difficult with real APIs</li>
+<li>CI/CD environments may not have access to the external network</li>
+</ol>
+<blockquote>
+<p>A padawan developer once asked the Council of Patterns about testing APIs: &quot;But if I mock the API, am I not just testing my mocks?&quot; The eldest council member smiled and replied, &quot;If you test the real API, you're testing someone else's code. If you mock nothing, your tests will be as unpredictable as a droid with a corrupted memory core. The path of wisdom lies between.&quot; The young developer nodded, though it would be years before they truly understood.</p>
+</blockquote>
+<p>Enter Mock Service Worker (MSW) - a library that intercepts actual HTTP requests at the network level and returns mocked responses. Unlike traditional mocking approaches that replace your HTTP client, MSW works by intercepting requests at a lower level, providing a more realistic testing experience.</p>
+<h2>Setting Up MSW for Angular 18</h2>
+<p>Let's start by installing MSW and its dependencies:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> msw@latest --save-dev
+<span class="token function">npm</span> <span class="token function">install</span> jest-fixed-jsdom node-fetch@2 undici --save-dev
+<span class="token function">npm</span> <span class="token function">install</span> @types/node-fetch@2 --save-dev</code></pre>
+<p>Next, we need to create a mock service worker setup. We'll centralize our mocks in a single location:</p>
+<pre><code>src/
+└── mocks/
+    ├── handlers.ts
+    ├── browser.ts
+    └── server.ts
+</code></pre>
+<h3>Creating Mock Handlers with MSW</h3>
+<p>The handlers define how MSW should respond to specific API requests. In MSW v2, we use the <code>http</code> namespace instead of <code>rest</code> and the new <code>HttpResponse</code> API for creating responses:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/mocks/handlers.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> http<span class="token punctuation">,</span> HttpResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"msw"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> environment <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../environments/environment"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Sample character data matching the swapi.tech API format with expanded=true</span>
+<span class="token keyword">const</span> characters <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>
+    uid<span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
+    name<span class="token operator">:</span> <span class="token string">"Luke Skywalker"</span><span class="token punctuation">,</span>
+    url<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/people/1"</span><span class="token punctuation">,</span>
+    properties<span class="token operator">:</span> <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"Luke Skywalker"</span><span class="token punctuation">,</span>
+      height<span class="token operator">:</span> <span class="token string">"172"</span><span class="token punctuation">,</span>
+      mass<span class="token operator">:</span> <span class="token string">"77"</span><span class="token punctuation">,</span>
+      hair_color<span class="token operator">:</span> <span class="token string">"blond"</span><span class="token punctuation">,</span>
+      skin_color<span class="token operator">:</span> <span class="token string">"fair"</span><span class="token punctuation">,</span>
+      eye_color<span class="token operator">:</span> <span class="token string">"blue"</span><span class="token punctuation">,</span>
+      birth_year<span class="token operator">:</span> <span class="token string">"19BBY"</span><span class="token punctuation">,</span>
+      gender<span class="token operator">:</span> <span class="token string">"male"</span><span class="token punctuation">,</span>
+      homeworld<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/planets/1"</span><span class="token punctuation">,</span>
+      created<span class="token operator">:</span> <span class="token string">"2020-09-17T06:49:05.235Z"</span><span class="token punctuation">,</span>
+      edited<span class="token operator">:</span> <span class="token string">"2020-09-17T06:49:05.235Z"</span><span class="token punctuation">,</span>
+      url<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/people/1"</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    description<span class="token operator">:</span> <span class="token string">"A person within the Star Wars universe"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    uid<span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span>
+    name<span class="token operator">:</span> <span class="token string">"C-3PO"</span><span class="token punctuation">,</span>
+    url<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/people/2"</span><span class="token punctuation">,</span>
+    properties<span class="token operator">:</span> <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"C-3PO"</span><span class="token punctuation">,</span>
+      height<span class="token operator">:</span> <span class="token string">"167"</span><span class="token punctuation">,</span>
+      mass<span class="token operator">:</span> <span class="token string">"75"</span><span class="token punctuation">,</span>
+      hair_color<span class="token operator">:</span> <span class="token string">"n/a"</span><span class="token punctuation">,</span>
+      skin_color<span class="token operator">:</span> <span class="token string">"gold"</span><span class="token punctuation">,</span>
+      eye_color<span class="token operator">:</span> <span class="token string">"yellow"</span><span class="token punctuation">,</span>
+      birth_year<span class="token operator">:</span> <span class="token string">"112BBY"</span><span class="token punctuation">,</span>
+      gender<span class="token operator">:</span> <span class="token string">"n/a"</span><span class="token punctuation">,</span>
+      homeworld<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/planets/1"</span><span class="token punctuation">,</span>
+      created<span class="token operator">:</span> <span class="token string">"2020-09-17T06:49:05.235Z"</span><span class="token punctuation">,</span>
+      edited<span class="token operator">:</span> <span class="token string">"2020-09-17T06:49:05.235Z"</span><span class="token punctuation">,</span>
+      url<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/people/2"</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    description<span class="token operator">:</span> <span class="token string">"A person within the Star Wars universe"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> handlers <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token comment">// Handle GET request for all characters with pagination</span>
+  http<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>environment<span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">people</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> request <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token constant">URL</span></span><span class="token punctuation">(</span>request<span class="token punctuation">.</span>url<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> page <span class="token operator">=</span> url<span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"page"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token string">"1"</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> limit <span class="token operator">=</span> url<span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"limit"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token string">"10"</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> expanded <span class="token operator">=</span> url<span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"expanded"</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token string">"true"</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> name <span class="token operator">=</span> url<span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Handle search by name</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> filteredResults <span class="token operator">=</span> characters<span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>char<span class="token punctuation">)</span> <span class="token operator">=></span>
+        char<span class="token punctuation">.</span>name<span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span>name<span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token keyword">return</span> HttpResponse<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        message<span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span>
+        total_records<span class="token operator">:</span> filteredResults<span class="token punctuation">.</span>length<span class="token punctuation">,</span>
+        total_pages<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+        previous<span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+        next<span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+        results<span class="token operator">:</span> filteredResults<span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Handle pagination</span>
+    <span class="token keyword">const</span> pageNum <span class="token operator">=</span> <span class="token function">parseInt</span><span class="token punctuation">(</span>page<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> hasNextPage <span class="token operator">=</span> pageNum <span class="token operator">&lt;</span> <span class="token number">9</span><span class="token punctuation">;</span> <span class="token comment">// Assuming 9 pages total</span>
+    <span class="token keyword">const</span> hasPrevPage <span class="token operator">=</span> pageNum <span class="token operator">></span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> HttpResponse<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      message<span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span>
+      total_records<span class="token operator">:</span> <span class="token number">82</span><span class="token punctuation">,</span>
+      total_pages<span class="token operator">:</span> <span class="token number">9</span><span class="token punctuation">,</span>
+      previous<span class="token operator">:</span> hasPrevPage
+        <span class="token operator">?</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://www.swapi.tech/api/people?page=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>pageNum <span class="token operator">-</span> <span class="token number">1</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;limit=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>limit<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span>
+        <span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+      next<span class="token operator">:</span> hasNextPage
+        <span class="token operator">?</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://www.swapi.tech/api/people?page=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>pageNum <span class="token operator">+</span> <span class="token number">1</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;limit=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>limit<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span>
+        <span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+      results<span class="token operator">:</span> characters<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+  <span class="token comment">// Handle GET request for a specific character</span>
+  http<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>environment<span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">people/:id</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> params <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{</span> id <span class="token punctuation">}</span> <span class="token operator">=</span> params<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> character <span class="token operator">=</span> characters<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token operator">=></span> c<span class="token punctuation">.</span>uid <span class="token operator">===</span> id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>character<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token comment">// The Ancient Order of Angular teaches us to handle errors gracefully</span>
+      <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">HttpResponse</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token number">404</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">return</span> HttpResponse<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      message<span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span>
+      result<span class="token operator">:</span> character<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+  <span class="token comment">// Handle error scenario for testing</span>
+  http<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>environment<span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">error-test</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">HttpResponse</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token number">500</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
+<h3>Setting Up MSW v2 for Browser</h3>
+<p>For our browser environment (both development and E2E tests), we need to set up MSW to work with the browser. Note the import path change to <code>msw/browser</code> in MSW v2:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/mocks/browser.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> setupWorker <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"msw/browser"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> handlers <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./handlers"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// This configures a Service Worker with the given request handlers</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> worker <span class="token operator">=</span> <span class="token function">setupWorker</span><span class="token punctuation">(</span><span class="token operator">...</span>handlers<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h3>Setting Up MSW v2 for Node (Jest Tests)</h3>
+<p>For Jest unit tests running in Node environment, we need a server setup.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/mocks/server.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> setupServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"msw/node"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> handlers <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./handlers"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// This configures a request mocking server with the given request handlers</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">setupServer</span><span class="token punctuation">(</span><span class="token operator">...</span>handlers<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Configuring MSW for Jest Unit Tests</h2>
+<p>To use MSW in our Jest tests, we need to update our Jest setup file and configuration. First, let's update our Jest config to use the fixed JSDOM environment which works better with MSW. The standard JSDOM environment has issues with MSW's request interception, particularly with fetch requests and certain headers. The jest-fixed-jsdom package provides a patched version that properly supports MSW's network interception capabilities:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// jest.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">preset</span><span class="token operator">:</span> <span class="token string">"jest-preset-angular"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">setupFilesAfterEnv</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"&lt;rootDir>/setup-jest.ts"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">testEnvironment</span><span class="token operator">:</span> <span class="token string">"jest-fixed-jsdom"</span><span class="token punctuation">,</span> <span class="token comment">// Use fixed JSDOM for better MSW v2 compatibility</span>
+  <span class="token comment">// other config options...</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>Next, we'll update our Jest setup file to initialize the MSW server:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// setup-jest.ts</span>
+<span class="token keyword">import</span> <span class="token string">"jest-preset-angular/setup-jest"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> server <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./src/mocks/server"</span><span class="token punctuation">;</span> <span class="token comment">// Updated import path</span>
+
+<span class="token comment">// Establish API mocking before all tests</span>
+<span class="token function">beforeAll</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Reset any request handlers that we may add during the tests,</span>
+<span class="token comment">// so they don't affect other tests</span>
+<span class="token function">afterEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">resetHandlers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Clean up after the tests are finished</span>
+<span class="token function">afterAll</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Testing the Star Wars Service with MSW v2 and Angular 18</h2>
+<p>Now, let's write a test for our Star Wars service using MSW v2 and Angular 18's new provider syntax. Here's how our updated test looks:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/core/services/star-wars.service.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> TestBed <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core/testing"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> provideHttpClient<span class="token punctuation">,</span> withFetch <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common/http"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> StarWarsService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./star-wars.service"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> firstValueFrom <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"rxjs"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> server <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../mocks/server"</span><span class="token punctuation">;</span> <span class="token comment">// Updated import path</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> http<span class="token punctuation">,</span> HttpResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"msw"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> environment <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../environments/environment"</span><span class="token punctuation">;</span>
+
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">"StarWarsService"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> service<span class="token operator">:</span> StarWarsService<span class="token punctuation">;</span>
+
+  <span class="token function">beforeEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    TestBed<span class="token punctuation">.</span><span class="token function">configureTestingModule</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      providers<span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token function">provideHttpClient</span><span class="token punctuation">(</span><span class="token function">withFetch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// Angular 18 functional providers</span>
+        StarWarsService<span class="token punctuation">,</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    service <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">inject</span><span class="token punctuation">(</span>StarWarsService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should be created"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>service<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeTruthy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should fetch characters"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">firstValueFrom</span><span class="token punctuation">(</span>service<span class="token punctuation">.</span><span class="token function">getCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">expect</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>results<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>results<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>name<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">"Luke Skywalker"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>message<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">"ok"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should fetch a specific character"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">firstValueFrom</span><span class="token punctuation">(</span>service<span class="token punctuation">.</span><span class="token function">getCharacter</span><span class="token punctuation">(</span><span class="token string">"1"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">expect</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>result<span class="token punctuation">.</span>name<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">"Luke Skywalker"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>result<span class="token punctuation">.</span>properties<span class="token punctuation">.</span>height<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">"172"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>message<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">"ok"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should handle errors"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token comment">// Override the handler just for this test</span>
+    server<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>
+      http<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>environment<span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">people</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">HttpResponse</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token number">500</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+      <span class="token keyword">await</span> <span class="token function">firstValueFrom</span><span class="token punctuation">(</span>service<span class="token punctuation">.</span><span class="token function">getCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token comment">// Should not reach here</span>
+      <span class="token function">fail</span><span class="token punctuation">(</span><span class="token string">"Expected error but got success"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token function">expect</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeTruthy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Configuring MSW v2 for Playwright E2E Tests</h2>
+<p>For Playwright E2E tests, we need a special setup to initialize MSW v2 in both the Node environment and inject it into the browser context. Let's create a dedicated setup file for Playwright with the updated MSW v2 imports:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// e2e/setup/msw.setup.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> test <span class="token keyword">as</span> base <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@playwright/test"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> setupServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"msw/node"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> handlers <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../src/mocks/handlers"</span><span class="token punctuation">;</span> <span class="token comment">// Updated import path</span>
+
+<span class="token comment">// Create MSW server instance</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">setupServer</span><span class="token punctuation">(</span><span class="token operator">...</span>handlers<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Define a custom test fixture that sets up MSW</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> test <span class="token operator">=</span> base<span class="token punctuation">.</span><span class="token function">extend</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token comment">// Start MSW server before tests</span>
+  <span class="token function-variable function">page</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> page <span class="token punctuation">}</span><span class="token punctuation">,</span> use<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token comment">// Start the MSW server before all tests</span>
+    server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token punctuation">{</span> onUnhandledRequest<span class="token operator">:</span> <span class="token string">"bypass"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Bypass unhandled requests in MSW v2</span>
+
+    <span class="token comment">// Add MSW enabled flag to browser context</span>
+    <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">addInitScript</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      window<span class="token punctuation">.</span>localStorage<span class="token punctuation">.</span><span class="token function">setItem</span><span class="token punctuation">(</span><span class="token string">"useMSW"</span><span class="token punctuation">,</span> <span class="token string">"true"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Use the page with MSW enabled</span>
+    <span class="token keyword">await</span> <span class="token function">use</span><span class="token punctuation">(</span>page<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Clean up after tests</span>
+    server<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Export expect for convenience</span>
+<span class="token keyword">export</span> <span class="token punctuation">{</span> expect <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@playwright/test"</span><span class="token punctuation">;</span></code></pre>
+<p>Next, we need to update our Playwright configuration to use this setup file and ensure we're using our MSW-enabled environment:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// playwright.config.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> defineConfig<span class="token punctuation">,</span> devices <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@playwright/test"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> path <span class="token keyword">from</span> <span class="token string">"path"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token function">defineConfig</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  testDir<span class="token operator">:</span> <span class="token string">"./e2e"</span><span class="token punctuation">,</span>
+  fullyParallel<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  forbidOnly<span class="token operator">:</span> <span class="token operator">!</span><span class="token operator">!</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span><span class="token punctuation">,</span>
+  retries<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span> <span class="token operator">?</span> <span class="token number">2</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  workers<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+  reporter<span class="token operator">:</span> <span class="token string">"list"</span><span class="token punctuation">,</span> <span class="token comment">// Use list reporter instead of HTML for cleaner output</span>
+  use<span class="token operator">:</span> <span class="token punctuation">{</span>
+    baseURL<span class="token operator">:</span> <span class="token string">"http://localhost:4200"</span><span class="token punctuation">,</span>
+    trace<span class="token operator">:</span> <span class="token string">"on-first-retry"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  projects<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"chromium"</span><span class="token punctuation">,</span>
+      use<span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token operator">...</span>devices<span class="token punctuation">[</span><span class="token string">"Desktop Chrome"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"firefox"</span><span class="token punctuation">,</span>
+      use<span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token operator">...</span>devices<span class="token punctuation">[</span><span class="token string">"Desktop Firefox"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"webkit"</span><span class="token punctuation">,</span>
+      use<span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token operator">...</span>devices<span class="token punctuation">[</span><span class="token string">"Desktop Safari"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  webServer<span class="token operator">:</span> <span class="token punctuation">{</span>
+    command<span class="token operator">:</span> <span class="token string">"npm run start:mocks"</span><span class="token punctuation">,</span> <span class="token comment">// Use our mocks-enabled start script</span>
+    url<span class="token operator">:</span> <span class="token string">"http://localhost:4200"</span><span class="token punctuation">,</span>
+    reuseExistingServer<span class="token operator">:</span> <span class="token operator">!</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span><span class="token punctuation">,</span>
+    timeout<span class="token operator">:</span> <span class="token number">120000</span><span class="token punctuation">,</span> <span class="token comment">// Increased timeout for slower machines</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>We also need to make sure our environment configuration supports MSW toggling and update our main.ts file to conditionally load the MSW worker:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/environments/environment.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> environment <span class="token operator">=</span> <span class="token punctuation">{</span>
+  production<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  apiUrl<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/"</span><span class="token punctuation">,</span>
+  useMSW<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">// src/environments/environment.prod.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> environment <span class="token operator">=</span> <span class="token punctuation">{</span>
+  production<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  apiUrl<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/"</span><span class="token punctuation">,</span>
+  useMSW<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/main.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> bootstrapApplication <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/platform-browser"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> appConfig <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app/app.config"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> AppComponent <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app/app.component"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> environment <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./environments/environment"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Conditionally initialize MSW only in non-production or when explicitly enabled</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>environment<span class="token punctuation">.</span>useMSW<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// Dynamic import to avoid loading MSW code in production</span>
+  <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">"./mocks/browser"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{</span> worker <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    worker<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">{</span> onUnhandledRequest<span class="token operator">:</span> <span class="token string">"bypass"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">bootstrapApplication</span><span class="token punctuation">(</span>AppComponent<span class="token punctuation">,</span> appConfig<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=></span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Writing E2E Tests with MSW</h2>
+<p>Now we can write E2E tests that use our mocked API. Here's our character list test using our custom MSW setup with stable data-testid selectors:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// e2e/character-list.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> test<span class="token punctuation">,</span> expect <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./setup/msw.setup"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> http<span class="token punctuation">,</span> HttpResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"msw"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> server <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./setup/msw.setup"</span><span class="token punctuation">;</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"should display character list"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> page <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">"/characters"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Wait for the characters to load using data-testid</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">waitForSelector</span><span class="token punctuation">(</span><span class="token string">'[data-testid="character-list-heading"]'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    timeout<span class="token operator">:</span> <span class="token number">5000</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Character list heading found"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Check if Luke Skywalker is displayed</span>
+  <span class="token keyword">const</span> lukeCard <span class="token operator">=</span> page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">'mat-card-title:has-text("Luke Skywalker")'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>lukeCard<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeVisible</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Luke Skywalker card found"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Check if C-3PO is displayed</span>
+  <span class="token keyword">const</span> c3poCard <span class="token operator">=</span> page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">'mat-card-title:has-text("C-3PO")'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>c3poCard<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeVisible</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"C-3PO card found"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"should display error message when API fails"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> page <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token comment">// Override the handler just for this test</span>
+  server<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>
+    http<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"https://www.swapi.tech/api/people"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">HttpResponse</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token number">500</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">"/characters"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Check if error message is displayed</span>
+  <span class="token keyword">const</span> errorMessage <span class="token operator">=</span> page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">'[data-testid="error-message"]'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>errorMessage<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeVisible</span><span class="token punctuation">(</span><span class="token punctuation">{</span> timeout<span class="token operator">:</span> <span class="token number">5000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>errorMessage<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContainText</span><span class="token punctuation">(</span><span class="token string">"Error loading characters"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Directory Structure Organization</h2>
+<p>We've organized our mock files in a single <code>src/mocks</code> directory for better maintainability:</p>
+<pre><code>src/
+└── mocks/         # All mock files in one place
+    ├── handlers.ts
+    ├── browser.ts
+    └── server.ts
+</code></pre>
+<p>This clean structure makes imports consistent and avoids module resolution issues. All tests and the main application reference these files from the same location.</p>
+<h2>Cosmic Compiler Summary</h2>
+<p>The Cosmic Compiler has guided us through the implementation of MSW for API mocking in our Angular 18 application. Let's review what we've accomplished:</p>
+<ul>
+<li>We've <strong>installed MSW and its dependencies</strong> including jest-fixed-jsdom for better compatibility</li>
+<li>We've <strong>organized our mock files</strong> in a single src/mocks directory for better organization</li>
+<li>We've <strong>created handlers using the http namespace</strong> for intercepting network requests</li>
+<li>We've <strong>implemented HttpResponse.json()</strong> for creating mock responses</li>
+<li>We've <strong>configured Jest</strong> to use jest-fixed-jsdom for better MSW compatibility</li>
+<li>We've <strong>modernized our Angular tests</strong> to use Angular 18's functional providers like provideHttpClient(withFetch())</li>
+<li>We've <strong>improved our E2E tests</strong> with stable data-testid selectors and better debugging</li>
+<li>We've <strong>added conditional MSW initialization</strong> in our main.ts to avoid loading MSW in production</li>
+<li>We've <strong>configured our environment</strong> to toggle MSW usage based on environment settings</li>
+</ul>
+<blockquote>
+<p>The Recursive Philosopher once said: &quot;The best API is one you never have to call, and the best mock is one you never realize is a mock.&quot; The Cosmic Compiler nodded in approval, recognizing the paradoxical wisdom in testing what isn't there to ensure what is there works correctly.</p>
+</blockquote>
+<p><em>In our next transmission, we'll finally unveil the mystical DataSource pattern - the very foundation of our Galactic Archives. As the Ancient Order of Angular prophesied during that caffeine-fueled sprint review, &quot;The DataSource shall bring balance to your component logic, separating the concerns of data retrieval from presentation.&quot;</em></p>
+<p><em>May your mocks be realistic, your tests deterministic, and your Angular 18 applications blazingly fast.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-5-star-wars-api-service/">← Previous</a>
+        
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+ |         <a href="/musings/post-7-datasource-foundation/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

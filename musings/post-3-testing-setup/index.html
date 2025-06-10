@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Setting up Jest for unit tests and Playwright for end-to-end testing in our Angular application" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Angular DataSource with SWAPI: Building the Galactic Archives - Testing Setup with Jest and Playwright</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 3 testing setup</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Testing Setup with Jest and Playwright</h1>
+  <p class="subtitle">June 4, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-3" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-3" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Testing Setup with Jest and Playwright</h1>
+<p><em>In a parallel universe where bugs fix themselves and edge cases don't exist, testing might be optional. Unfortunately, we live in this universe, where untested code tends to explode spectacularly the moment it encounters production environments—a phenomenon the Ancient Order of Angular calls &quot;The Demo Effect.&quot;</em></p>
+<blockquote>
+<p>Legend has it that a senior developer once confidently declared, &quot;I don't need to test this change, it's just one line of code,&quot; right before his demo to the CEO crashed so spectacularly that it rebooted the CFO's laptop three rooms away. The Ancient Order still uses his terminal output as a teaching tool for junior developers.</p>
+</blockquote>
+<h2>The Testing Imperative</h2>
+<p>Before we dive into the exciting world of Star Wars data, we need to establish proper testing infrastructure. Without tests, we're essentially piloting a starship blindfolded through an asteroid field—technically possible, but with a high probability of spectacular failure.</p>
+<p>The Cosmic Compiler judges our code not just by its functionality, but by its testability. Today, we'll set up two powerful testing tools: Jest for unit and integration tests, and Playwright for end-to-end testing.</p>
+<p>Think of unit tests as microscopes examining individual cells of your application, while end-to-end tests are more like taking your application to a crowded shopping mall and seeing if it has a public meltdown. Unit tests say, &quot;Does this function return 42 when I pass it the ultimate question?&quot; E2E tests say, &quot;Can a sleep-deprived user with exactly 16 browser tabs open still navigate our checkout flow at 3 AM?&quot;</p>
+<p>The Council of Patterns has a saying: &quot;Unit tests tell you if your code is broken; E2E tests tell you if your users are broken.&quot; Both are equally important discoveries.</p>
+<h2>Setting Up Jest</h2>
+<p>Angular's default testing framework is Karma/Jasmine, but the Council of Patterns has decreed Jest to be more efficient for modern applications. Let's make the switch:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Remove the default testing setup</span>
+<span class="token function">npm</span> remove karma karma-chrome-launcher karma-coverage karma-jasmine karma-jasmine-html-reporter
+
+<span class="token comment"># Install Jest and related packages</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-D</span> jest @types/jest jest-preset-angular ts-jest</code></pre>
+<p>Now, let's create a <code>jest.config.js</code> file in the project root:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// jest.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">preset</span><span class="token operator">:</span> <span class="token string">"jest-preset-angular"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">setupFilesAfterEnv</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"&lt;rootDir>/setup-jest.ts"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">testPathIgnorePatterns</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token string">"&lt;rootDir>/node_modules/"</span><span class="token punctuation">,</span>
+    <span class="token string">"&lt;rootDir>/dist/"</span><span class="token punctuation">,</span>
+    <span class="token string">"&lt;rootDir>/e2e/"</span><span class="token punctuation">,</span> <span class="token comment">// Since we're using playwrite for e2e we need to exclude them from jest. The Cosmic Compiler appreciates separation of test types</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">coverageDirectory</span><span class="token operator">:</span> <span class="token string">"coverage"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">coverageReporters</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"html"</span><span class="token punctuation">,</span> <span class="token string">"lcov"</span><span class="token punctuation">,</span> <span class="token string">"text"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">moduleNameMapper</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token string-property property">"^src/(.*)$"</span><span class="token operator">:</span> <span class="token string">"&lt;rootDir>/src/$1"</span><span class="token punctuation">,</span> <span class="token comment">// For clean imports</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">testMatch</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token string">"**/*.spec.ts"</span><span class="token punctuation">,</span> <span class="token comment">// The Ancient Order of Angular prefers .spec.ts for test files</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>Next, create a <code>setup-jest.ts</code> file:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// setup-jest.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> setupZoneTestEnv <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"jest-preset-angular/setup-env/zone"</span><span class="token punctuation">;</span>
+
+<span class="token function">setupZoneTestEnv</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Global mocks go here</span>
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>window<span class="token punctuation">,</span> <span class="token string">"CSS"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>document<span class="token punctuation">,</span> <span class="token string">"doctype"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  value<span class="token operator">:</span> <span class="token string">"&lt;!DOCTYPE html>"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>window<span class="token punctuation">,</span> <span class="token string">"getComputedStyle"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token function-variable function">value</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
+    display<span class="token operator">:</span> <span class="token string">"none"</span><span class="token punctuation">,</span>
+    appearance<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"-webkit-appearance"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Update your <code>tsconfig.spec.json</code>:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"extends"</span><span class="token operator">:</span> <span class="token string">"./tsconfig.json"</span><span class="token punctuation">,</span>
+  <span class="token property">"compilerOptions"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"outDir"</span><span class="token operator">:</span> <span class="token string">"./out-tsc/spec"</span><span class="token punctuation">,</span>
+    <span class="token property">"types"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"jest"</span><span class="token punctuation">,</span> <span class="token string">"node"</span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"include"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"src/**/*.spec.ts"</span><span class="token punctuation">,</span> <span class="token string">"src/**/*.d.ts"</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Finally, update your <code>package.json</code> scripts:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"scripts"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ... other scripts</span>
+    <span class="token property">"test"</span><span class="token operator">:</span> <span class="token string">"jest"</span><span class="token punctuation">,</span>
+    <span class="token property">"test:watch"</span><span class="token operator">:</span> <span class="token string">"jest --watch"</span><span class="token punctuation">,</span>
+    <span class="token property">"test:coverage"</span><span class="token operator">:</span> <span class="token string">"jest --coverage"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Setting Up Playwright</h2>
+<p>For end-to-end testing, we'll use Playwright, which allows us to test our application across multiple browsers:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Install Playwright</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-D</span> @playwright/test</code></pre>
+<p>Initialize Playwright configuration:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># The Cosmic Compiler appreciates proper initialization</span>
+npx playwright <span class="token function">install</span>
+npx playwright install-deps</code></pre>
+<p>Create a <code>playwright.config.ts</code> file:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// playwright.config.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> defineConfig<span class="token punctuation">,</span> devices <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@playwright/test"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token function">defineConfig</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  testDir<span class="token operator">:</span> <span class="token string">"./e2e"</span><span class="token punctuation">,</span>
+  fullyParallel<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  forbidOnly<span class="token operator">:</span> <span class="token operator">!</span><span class="token operator">!</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span><span class="token punctuation">,</span>
+  retries<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span> <span class="token operator">?</span> <span class="token number">2</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  workers<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+  reporter<span class="token operator">:</span> <span class="token string">"html"</span><span class="token punctuation">,</span>
+  use<span class="token operator">:</span> <span class="token punctuation">{</span>
+    baseURL<span class="token operator">:</span> <span class="token string">"http://localhost:4200"</span><span class="token punctuation">,</span>
+    trace<span class="token operator">:</span> <span class="token string">"on-first-retry"</span><span class="token punctuation">,</span>
+    screenshot<span class="token operator">:</span> <span class="token string">"only-on-failure"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  projects<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"chromium"</span><span class="token punctuation">,</span>
+      use<span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token operator">...</span>devices<span class="token punctuation">[</span><span class="token string">"Desktop Chrome"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"firefox"</span><span class="token punctuation">,</span>
+      use<span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token operator">...</span>devices<span class="token punctuation">[</span><span class="token string">"Desktop Firefox"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      name<span class="token operator">:</span> <span class="token string">"webkit"</span><span class="token punctuation">,</span>
+      use<span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token operator">...</span>devices<span class="token punctuation">[</span><span class="token string">"Desktop Safari"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  webServer<span class="token operator">:</span> <span class="token punctuation">{</span>
+    command<span class="token operator">:</span> <span class="token string">"npm run start"</span><span class="token punctuation">,</span>
+    url<span class="token operator">:</span> <span class="token string">"http://localhost:4200"</span><span class="token punctuation">,</span>
+    reuseExistingServer<span class="token operator">:</span> <span class="token operator">!</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span><span class="token punctuation">,</span>
+    timeout<span class="token operator">:</span> <span class="token number">120000</span><span class="token punctuation">,</span> <span class="token comment">// The Dependency Demons require patience during startup</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Create an <code>e2e</code> directory with a sample test:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// e2e/app.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> test<span class="token punctuation">,</span> expect <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@playwright/test"</span><span class="token punctuation">;</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"has title"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> page <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Wait for the title to be visible</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">"h1"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContainText</span><span class="token punctuation">(</span><span class="token string">"Galactic Archives"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"navigates to home page"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> page <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Check if the app shell is rendered</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">"header"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeVisible</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">"footer"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeVisible</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Update your <code>package.json</code> scripts for Playwright:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"scripts"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ... other scripts</span>
+    <span class="token property">"e2e"</span><span class="token operator">:</span> <span class="token string">"playwright test"</span><span class="token punctuation">,</span>
+    <span class="token property">"e2e:ui"</span><span class="token operator">:</span> <span class="token string">"playwright test --ui"</span><span class="token punctuation">,</span>
+    <span class="token property">"e2e:report"</span><span class="token operator">:</span> <span class="token string">"playwright show-report"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Creating Basic Unit Tests</h2>
+<p>Let's create a simple test for our app component:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/app.component.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ComponentFixture<span class="token punctuation">,</span> TestBed <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core/testing"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> RouterTestingModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/router/testing"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> AppComponent <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app.component"</span><span class="token punctuation">;</span>
+
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">"AppComponent"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> component<span class="token operator">:</span> AppComponent<span class="token punctuation">;</span>
+  <span class="token keyword">let</span> fixture<span class="token operator">:</span> ComponentFixture<span class="token operator">&lt;</span>AppComponent<span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token function">beforeEach</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> TestBed<span class="token punctuation">.</span><span class="token function">configureTestingModule</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      imports<span class="token operator">:</span> <span class="token punctuation">[</span>
+        RouterTestingModule<span class="token punctuation">,</span>
+        AppComponent<span class="token punctuation">,</span> <span class="token comment">// Import the standalone component directly</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">compileComponents</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    fixture <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>AppComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    component <span class="token operator">=</span> fixture<span class="token punctuation">.</span>componentInstance<span class="token punctuation">;</span>
+    fixture<span class="token punctuation">.</span><span class="token function">detectChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should create the app"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token comment">// The Cosmic Compiler expects components to exist</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>component<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeTruthy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">should have the correct title</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>component<span class="token punctuation">.</span>title<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toEqual</span><span class="token punctuation">(</span><span class="token string">"Galactic Archives"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should render title in header"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> compiled <span class="token operator">=</span> fixture<span class="token punctuation">.</span>nativeElement <span class="token keyword">as</span> HTMLElement<span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>compiled<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">"header h1"</span><span class="token punctuation">)</span><span class="token operator">?.</span>textContent<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContain</span><span class="token punctuation">(</span>
+      <span class="token string">"Galactic Archives"</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should have the current year in the footer"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> compiled <span class="token operator">=</span> fixture<span class="token punctuation">.</span>nativeElement <span class="token keyword">as</span> HTMLElement<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> currentYear <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getFullYear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>compiled<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">"footer"</span><span class="token punctuation">)</span><span class="token operator">?.</span>textContent<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContain</span><span class="token punctuation">(</span>
+      currentYear
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Testing Standalone Components</h2>
+<p>Angular v18's standalone components require a slightly different testing approach. Since we're not using NgModules, we need to import our components directly into the test module:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/example/example.component.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ComponentFixture<span class="token punctuation">,</span> TestBed <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core/testing"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ExampleComponent <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./example.component"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatButtonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/button"</span><span class="token punctuation">;</span>
+
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">"ExampleComponent"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> component<span class="token operator">:</span> ExampleComponent<span class="token punctuation">;</span>
+  <span class="token keyword">let</span> fixture<span class="token operator">:</span> ComponentFixture<span class="token operator">&lt;</span>ExampleComponent<span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token function">beforeEach</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> TestBed<span class="token punctuation">.</span><span class="token function">configureTestingModule</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      imports<span class="token operator">:</span> <span class="token punctuation">[</span>
+        ExampleComponent<span class="token punctuation">,</span>
+        <span class="token comment">// Import any dependencies the component has</span>
+        MatButtonModule<span class="token punctuation">,</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">compileComponents</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    fixture <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>ExampleComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    component <span class="token operator">=</span> fixture<span class="token punctuation">.</span>componentInstance<span class="token punctuation">;</span>
+    fixture<span class="token punctuation">.</span><span class="token function">detectChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should create"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>component<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeTruthy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Looking Ahead: Testing and Architecture</h2>
+<p>In the next post, we'll dive into feature-based architecture and how it shapes our testing strategy. For now, we've set up the testing tools we need, but the real magic happens when we align our tests with a well-structured application.</p>
+<blockquote>
+<p>The Ancient Order tells of a developer who organized all their code in a single file named &quot;everything.ts&quot; with 17,000 lines. Legend says that when asked about testing strategy, they simply laughed maniacally before disappearing into the night, never to be seen again. Some say their ghost still haunts legacy codebases, whispering &quot;just one more function&quot; to unsuspecting juniors.</p>
+</blockquote>
+<p>With our testing foundations in place, we're ready to build our application with testability in mind from the start.</p>
+<h2>When to Use Each Testing Approach</h2>
+<p>Different testing tools serve different purposes, much like how different lightsaber crystals produce different blade colors:</p>
+<h3>Jest (Unit &amp; Integration Tests)</h3>
+<p>Jest excels at testing individual units of code and their interactions:</p>
+<ul>
+<li><strong>Component Tests</strong>: Verify that components render correctly and respond to user interactions</li>
+<li><strong>Service Tests</strong>: Ensure services process data correctly and handle errors gracefully</li>
+<li><strong>Pipe Tests</strong>: Validate that pipes transform data as expected</li>
+<li><strong>Directive Tests</strong>: Check that directives modify the DOM correctly</li>
+</ul>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Example service test</span>
+<span class="token comment">// src/app/core/services/example.service.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> TestBed <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core/testing"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ExampleService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./example.service"</span><span class="token punctuation">;</span>
+
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">"ExampleService"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> service<span class="token operator">:</span> ExampleService<span class="token punctuation">;</span>
+
+  <span class="token function">beforeEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    TestBed<span class="token punctuation">.</span><span class="token function">configureTestingModule</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    service <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">inject</span><span class="token punctuation">(</span>ExampleService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should be created"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>service<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeTruthy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should transform data correctly"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> input <span class="token operator">=</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token string">"Luke"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> expected <span class="token operator">=</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token string">"LUKE"</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>service<span class="token punctuation">.</span><span class="token function">transformData</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toEqual</span><span class="token punctuation">(</span>expected<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// The Cosmic Compiler appreciates thorough error testing</span>
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should handle null input gracefully"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> service<span class="token punctuation">.</span><span class="token function">transformData</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span>not<span class="token punctuation">.</span><span class="token function">toThrow</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h3>Playwright (End-to-End Tests)</h3>
+<p>Playwright tests the application as a whole, simulating real user interactions:</p>
+<ul>
+<li><strong>User Flows</strong>: Test complete user journeys through the application</li>
+<li><strong>Visual Regression</strong>: Ensure the UI appears as expected across browsers</li>
+<li><strong>Network Interactions</strong>: Verify that the application interacts correctly with backend services</li>
+<li><strong>Performance</strong>: Check that the application loads and responds within acceptable timeframes</li>
+<li><strong>Accessibility</strong>: Ensure your app works for everyone (foreshadowing: the Cosmic Compiler judges harshly those who forget this step, as we'll discover in a future post)</li>
+</ul>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Example user flow test</span>
+<span class="token comment">// e2e/navigation.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> test<span class="token punctuation">,</span> expect <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@playwright/test"</span><span class="token punctuation">;</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"user can navigate through the application"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> page <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token comment">// Start at the home page</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Check initial state</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">"h1"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContainText</span><span class="token punctuation">(</span><span class="token string">"Galactic Archives"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Navigate to another page (once we have one)</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">getByRole</span><span class="token punctuation">(</span><span class="token string">"link"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token string">"Characters"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Verify navigation worked</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>page<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toHaveURL</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">.*\/characters</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// The Dependency Demons fear thorough testing</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">"h2"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContainText</span><span class="token punctuation">(</span><span class="token string">"Star Wars Characters"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Running Our Tests</h2>
+<p>Let's make sure our testing setup works:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Run Jest tests</span>
+<span class="token function">npm</span> <span class="token builtin class-name">test</span>
+
+<span class="token comment"># Run Playwright tests (make sure the app is running)</span>
+<span class="token function">npm</span> run e2e</code></pre>
+<p>If everything is configured correctly, you should see the test results in your terminal. The Cosmic Compiler will be pleased with your diligence.</p>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>set up Jest</strong> for unit and integration testing, replacing the default Karma/Jasmine setup</li>
+<li>We've <strong>configured Playwright</strong> for end-to-end testing across multiple browsers</li>
+<li>We've <strong>created basic tests</strong> for both frameworks to validate our setup</li>
+<li>We've <strong>explained when to use each testing approach</strong> for different testing scenarios</li>
+<li>We've <strong>added convenient test scripts</strong> to our package.json for running tests</li>
+</ul>
+<p><em>In our next transmission, we'll establish a proper feature-based architecture for our application, creating the foundation upon which our Galactic Archives will be built. The Council of Patterns has provided ancient scrolls detailing the optimal structure for Angular applications—scrolls that suspiciously resemble modern best practices documentation.</em></p>
+<p><em>May your tests be green and your coverage be high.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-2-code-quality-setup/">← Previous</a>
+        
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+ |         <a href="/musings/post-4-feature-based-architecture/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

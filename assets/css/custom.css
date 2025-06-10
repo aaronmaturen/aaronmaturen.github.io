@@ -35,9 +35,50 @@
 body {
   padding-left: 0 !important;
   padding-right: 0 !important;
-  width: 70% !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Featured Series Styling */
+.featured-series {
+  margin-bottom: 3rem;
+}
+
+.series-meta {
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* Code Links Styling */
+.code-links {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+/* Post Footer Styling */
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.github-links {
+  font-size: 0.875rem;
+}
+
+/* Series Navigation */
+.series-navigation {
+  margin-bottom: 1.5rem;
+}
+
+.series-tag {
+  margin-top: 0.75rem;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #4a5568;
 }
 
 /* Fix content width constraints */

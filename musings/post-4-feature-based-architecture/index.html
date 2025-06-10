@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Implementing a scalable feature-based architecture for our Angular application" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Angular DataSource with SWAPI: Building the Galactic Archives - Feature-Based Architecture</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 4 feature based architecture</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Feature-Based Architecture</h1>
+  <p class="subtitle">June 5, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-4" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-4" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Feature-Based Architecture</h1>
+<p><em>In the chaotic early days of web development, applications grew like wild space fungi—unpredictable, messy, and occasionally toxic to those who maintained them. Developers would throw components, services, and modules into a single directory like they were tossing laundry into a black hole, hoping the compiler would sort it out. Narrator: it did not.</em></p>
+<blockquote>
+<p>The Ancient Order tells of a project called &quot;The Monolith,&quot; a massive Angular application with a single 50,000-line app.module.ts file. When a junior developer asked why everything was in one module, the tech lead merely whispered, &quot;Historical reasons,&quot; before staring vacantly into the distance. The project was eventually abandoned after it achieved sentience and began rejecting pull requests with snarky comments.</p>
+</blockquote>
+<h2>The Problem with Architectural Entropy</h2>
+<p>As Angular applications grow, they tend toward chaos unless deliberately structured. Components multiply, services entangle, and dependencies form a web so complex that even the bravest developer fears making changes.</p>
+<p>The Council of Patterns recognized this problem eons ago (or at least since Angular 2) and bestowed upon us the wisdom of <strong>Feature-Based Architecture</strong>—a structural approach that brings order to the chaos.</p>
+<h2>What is Feature-Based Architecture?</h2>
+<p>Feature-based architecture organizes code around business features rather than technical functions. Instead of grouping all components together and all services elsewhere, we group by feature, creating clear boundaries and reducing cognitive load.</p>
+<blockquote>
+<p>The Cosmic Compiler once inquired why we would use feature-based architecture. I replied with &quot;Imagine if your kitchen stored all knives in one drawer, all spoons in another room, and all ingredients in a separate building. That's technical organization. Feature-based is having everything you need for pasta in one place, everything for baking in another. When you're making spaghetti, you don't care about cake ingredients.&quot; The Cosmic Compiler nodded in approval at this explanation before continuing to judge my variable naming conventions.</p>
+</blockquote>
+<h2>Creating Our Feature-Based Structure</h2>
+<p>Let's reorganize our application with a proper feature-based structure:</p>
+<pre><code>src/
+├── app/
+│   ├── core/              # Core services, guards, interceptors
+│   ├── features/          # Feature modules
+│   │   └── star-wars/     # Star Wars specific features
+│   ├── shared/            # Shared components, directives, pipes
+│   └── models/            # Interfaces and types
+├── environments/          # Environment configuration
+└── assets/                # Static assets
+</code></pre>
+<p>Think of this structure as a well-organized starship—each section has a specific purpose, but they all work together for a common mission.</p>
+<h2>Core Module: The Engine Room</h2>
+<p>The Core module contains services and functionality used throughout the application but aren't specific to any feature. These are typically singleton services that should be loaded once when the application starts.</p>
+<p>Let's create our Core module structure:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Create core directory structure</span>
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/core/services
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/core/interceptors
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/core/guards</code></pre>
+<p>Since we're using Angular v18 with standalone components, we don't need a CoreModule class, but we'll still organize our core services in this directory:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/core/services/logging.service.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Injectable <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  providedIn<span class="token operator">:</span> <span class="token string">"root"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LoggingService</span> <span class="token punctuation">{</span>
+  <span class="token function">log</span><span class="token punctuation">(</span>message<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">[Galactic Archives] </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>message<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">error</span><span class="token punctuation">(</span>message<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">[Galactic Archives] </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>message<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Features Directory: The Living Quarters</h2>
+<p>Features are the heart of our application—where the actual business logic lives. Each feature should be self-contained with its own components, services, and routes.</p>
+<p>Let's set up our Star Wars feature:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Create star-wars feature structure</span>
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/features/star-wars/components
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/features/star-wars/services</code></pre>
+<p>Here's an example of a simple standalone component in our feature:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/components/character-list/character-list.component.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Component <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> CommonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatCardModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/card"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatButtonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/button"</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-character-list"</span><span class="token punctuation">,</span>
+  standalone<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  imports<span class="token operator">:</span> <span class="token punctuation">[</span>CommonModule<span class="token punctuation">,</span> MatCardModule<span class="token punctuation">,</span> MatButtonModule<span class="token punctuation">]</span><span class="token punctuation">,</span>
+  template<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+    &lt;div
+      class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4"
+    >
+      &lt;mat-card class="tw-mb-4">
+        &lt;mat-card-header>
+          &lt;mat-card-title>Luke Skywalker&lt;/mat-card-title>
+        &lt;/mat-card-header>
+        &lt;mat-card-content>
+          &lt;p>A placeholder for our future Star Wars character data&lt;/p>
+        &lt;/mat-card-content>
+        &lt;mat-card-actions>
+          &lt;button mat-button>VIEW DETAILS&lt;/button>
+        &lt;/mat-card-actions>
+      &lt;/mat-card>
+    &lt;/div>
+  </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CharacterListComponent</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre>
+<h2>Shared Module: The Common Areas</h2>
+<p>The Shared module contains components, directives, and pipes used across multiple features. These are the reusable building blocks of our UI.</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Create shared directory structure</span>
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/shared/components
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/shared/directives
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/shared/pipes</code></pre>
+<p>Let's create a simple loading spinner component:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/shared/components/loading-spinner/loading-spinner.component.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Component<span class="token punctuation">,</span> Input <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> CommonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatProgressSpinnerModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/progress-spinner"</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-loading-spinner"</span><span class="token punctuation">,</span>
+  standalone<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  imports<span class="token operator">:</span> <span class="token punctuation">[</span>CommonModule<span class="token punctuation">,</span> MatProgressSpinnerModule<span class="token punctuation">]</span><span class="token punctuation">,</span>
+  template<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+    &lt;div
+      class="tw-flex tw-justify-center tw-items-center tw-p-4"
+      [class.tw-h-full]="fullHeight"
+    >
+      &lt;mat-spinner [diameter]="diameter" [color]="color">&lt;/mat-spinner>
+    &lt;/div>
+  </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LoadingSpinnerComponent</span> <span class="token punctuation">{</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Input</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> diameter <span class="token operator">=</span> <span class="token number">50</span><span class="token punctuation">;</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Input</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> color<span class="token operator">:</span> <span class="token string">"primary"</span> <span class="token operator">|</span> <span class="token string">"accent"</span> <span class="token operator">|</span> <span class="token string">"warn"</span> <span class="token operator">=</span> <span class="token string">"primary"</span><span class="token punctuation">;</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Input</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> fullHeight <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Models: The Blueprint Archives</h2>
+<p>Models define the shape of our data. Clear interfaces make our code more predictable and enable better tooling support.</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Create models directory</span>
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> src/app/models</code></pre>
+<p>Let's define some interfaces for our Star Wars data:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/models/character.model.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Character</span> <span class="token punctuation">{</span>
+  name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  height<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  mass<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  hair_color<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  skin_color<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  eye_color<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  birth_year<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  gender<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  homeworld<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  films<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  species<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  vehicles<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  starships<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  created<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  edited<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  url<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// src/app/models/api-response.model.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ApiResponse<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span> <span class="token punctuation">{</span>
+  count<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  next<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+  previous<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+  results<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Environment Configuration: The Control Panel</h2>
+<p>Environment configurations allow us to change settings based on where our application is running (development, staging, production).</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/environments/environment.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> environment <span class="token operator">=</span> <span class="token punctuation">{</span>
+  production<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  apiUrl<span class="token operator">:</span> <span class="token string">"https://swapi.dev/api/"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">// src/environments/environment.prod.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> environment <span class="token operator">=</span> <span class="token punctuation">{</span>
+  production<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  apiUrl<span class="token operator">:</span> <span class="token string">"https://swapi.dev/api/"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<h2>Routing with Feature-Based Architecture</h2>
+<p>With our feature-based architecture, we can organize routes to match our structure:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/app.routes.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Routes <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/router"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> routes<span class="token operator">:</span> Routes <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span> path<span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span> redirectTo<span class="token operator">:</span> <span class="token string">"home"</span><span class="token punctuation">,</span> pathMatch<span class="token operator">:</span> <span class="token string">"full"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    path<span class="token operator">:</span> <span class="token string">"home"</span><span class="token punctuation">,</span>
+    <span class="token function-variable function">loadComponent</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+      <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">"./features/home/home.component"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span>m<span class="token punctuation">)</span> <span class="token operator">=></span> m<span class="token punctuation">.</span>HomeComponent<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    path<span class="token operator">:</span> <span class="token string">"characters"</span><span class="token punctuation">,</span>
+    <span class="token function-variable function">loadComponent</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+      <span class="token keyword">import</span><span class="token punctuation">(</span>
+        <span class="token string">"./features/star-wars/components/character-list/character-list.component"</span>
+      <span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span>m<span class="token punctuation">)</span> <span class="token operator">=></span> m<span class="token punctuation">.</span>CharacterListComponent<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> path<span class="token operator">:</span> <span class="token string">"**"</span><span class="token punctuation">,</span> redirectTo<span class="token operator">:</span> <span class="token string">"home"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
+<h2>Testing in a Feature-Based Architecture</h2>
+<p>Our feature-based architecture makes testing more intuitive since our tests are colocated with our features:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/components/character-list/character-list.component.spec.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ComponentFixture<span class="token punctuation">,</span> TestBed <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core/testing"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> CharacterListComponent <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./character-list.component"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> NoopAnimationsModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/platform-browser/animations"</span><span class="token punctuation">;</span>
+
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">"CharacterListComponent"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> component<span class="token operator">:</span> CharacterListComponent<span class="token punctuation">;</span>
+  <span class="token keyword">let</span> fixture<span class="token operator">:</span> ComponentFixture<span class="token operator">&lt;</span>CharacterListComponent<span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token function">beforeEach</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> TestBed<span class="token punctuation">.</span><span class="token function">configureTestingModule</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      imports<span class="token operator">:</span> <span class="token punctuation">[</span>CharacterListComponent<span class="token punctuation">,</span> NoopAnimationsModule<span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">compileComponents</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    fixture <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>CharacterListComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    component <span class="token operator">=</span> fixture<span class="token punctuation">.</span>componentInstance<span class="token punctuation">;</span>
+    fixture<span class="token punctuation">.</span><span class="token function">detectChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should create"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>component<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeTruthy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<blockquote>
+<p>The Cosmic Compiler once witnessed a developer trying to test a component with 47 dependencies. As the developer struggled to mock each one, the Compiler whispered, &quot;Perhaps the problem isn't with your tests.&quot; The developer ignored this wisdom and continued adding mocks until the test file was larger than the actual application. Some say they're still adding mocks to this day, trapped in an infinite loop of dependency injection.</p>
+</blockquote>
+<h2>Benefits of Feature-Based Architecture</h2>
+<p>This architecture provides several benefits:</p>
+<ol>
+<li><strong>Scalability</strong>: Features can grow independently without affecting others</li>
+<li><strong>Maintainability</strong>: Related code is grouped together, making it easier to understand</li>
+<li><strong>Testability</strong>: Clear boundaries make testing more straightforward</li>
+<li><strong>Reusability</strong>: Shared components can be used across features</li>
+<li><strong>Lazy Loading</strong>: Features can be loaded on demand, improving performance</li>
+</ol>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>created a feature-based architecture</strong> with clear separation of concerns</li>
+<li>We've <strong>organized our code</strong> into core, features, shared, and models</li>
+<li>We've <strong>set up environment configuration</strong> for different deployment targets</li>
+<li>We've <strong>created standalone components</strong> that fit into our architecture</li>
+<li>We've <strong>structured our routing</strong> to align with our feature-based approach</li>
+</ul>
+<p><em>In our next transmission, we'll implement the Star Wars API service that will power our Galactic Archives. We'll leverage our new architecture to create a robust service layer that communicates with the SWAPI endpoints, handling errors and transforming data with the elegance of a Jedi Master.</em></p>
+<p><em>May your architecture be clean and your dependencies few.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-3-testing-setup/">← Previous</a>
+        
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+ |         <a href="/musings/post-5-star-wars-api-service/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

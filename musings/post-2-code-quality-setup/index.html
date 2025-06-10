@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Implementing code quality tools to maintain consistency and prevent bugs" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Angular DataSource with SWAPI: Building the Galactic Archives - Code Quality Setup</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 2 code quality setup</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Code Quality Setup</h1>
+  <p class="subtitle">June 3, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-2" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-2" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Code Quality Setup</h1>
+<p><em>In the vast expanse of the coding universe, there exists a special circle of developer hell reserved for those who commit unformatted code to repositories. It's a place where tabs and spaces wage eternal war, where semicolons appear and disappear like quantum particles, and where the Dependency Demons feast on inconsistent casing conventions.</em></p>
+<h2>The Quest for Code Quality</h2>
+<p>Any project worth its weight in bytes needs a proper code quality setup. Without it, even the most elegant architecture will eventually collapse under the weight of inconsistent formatting, unused variables, and the dreaded &quot;any&quot; type that lurks in the shadows.</p>
+<p>The Ancient Order of Angular has long decreed that proper linting and formatting are not mere suggestions but sacred obligations. As the TypeScript Prophecies foretold: &quot;He who uses any shall debug for eternity.&quot;</p>
+<h2>Setting Up ESLint</h2>
+<p>ESLint serves as our first line of defense against the forces of code entropy. Let's summon it into our project:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Invoke the linting guardians</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-D</span> eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-import
+
+<span class="token comment"># Angular-specific ESLint rules</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-D</span> @angular-eslint/eslint-plugin @angular-eslint/eslint-plugin-template @angular-eslint/template-parser</code></pre>
+<p>Now, let's create our <code>.eslintrc.json</code> configuration file:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"root"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"ignorePatterns"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"projects/**/*"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"overrides"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"files"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"*.ts"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token property">"extends"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token string">"eslint:recommended"</span><span class="token punctuation">,</span>
+        <span class="token string">"plugin:@typescript-eslint/recommended"</span><span class="token punctuation">,</span>
+        <span class="token string">"plugin:@angular-eslint/recommended"</span><span class="token punctuation">,</span>
+        <span class="token string">"plugin:@angular-eslint/template/process-inline-templates"</span><span class="token punctuation">,</span>
+        <span class="token string">"plugin:prettier/recommended"</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token property">"rules"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// The Ancient Order of Angular demands proper naming</span>
+        <span class="token property">"@angular-eslint/directive-selector"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token string">"error"</span><span class="token punctuation">,</span>
+          <span class="token punctuation">{</span>
+            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"attribute"</span><span class="token punctuation">,</span>
+            <span class="token property">"prefix"</span><span class="token operator">:</span> <span class="token string">"app"</span><span class="token punctuation">,</span>
+            <span class="token property">"style"</span><span class="token operator">:</span> <span class="token string">"camelCase"</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token property">"@angular-eslint/component-selector"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token string">"error"</span><span class="token punctuation">,</span>
+          <span class="token punctuation">{</span>
+            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"element"</span><span class="token punctuation">,</span>
+            <span class="token property">"prefix"</span><span class="token operator">:</span> <span class="token string">"app"</span><span class="token punctuation">,</span>
+            <span class="token property">"style"</span><span class="token operator">:</span> <span class="token string">"kebab-case"</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"files"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"*.html"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token property">"extends"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token string">"plugin:@angular-eslint/template/recommended"</span><span class="token punctuation">,</span>
+        <span class="token string">"plugin:@angular-eslint/template/accessibility"</span><span class="token punctuation">,</span>
+        <span class="token string">"plugin:prettier/recommended"</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token property">"rules"</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Configuring Prettier</h2>
+<p>While ESLint ensures our code follows best practices, Prettier ensures it looks consistently beautiful. The Galactic Standards Committee has strict regulations about code aesthetics:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Summon the formatting entity</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-D</span> prettier eslint-config-prettier eslint-plugin-prettier</code></pre>
+<p>Create a <code>.prettierrc</code> file:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"singleQuote"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"semi"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"tabWidth"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+  <span class="token property">"printWidth"</span><span class="token operator">:</span> <span class="token number">100</span><span class="token punctuation">,</span>
+  <span class="token property">"trailingComma"</span><span class="token operator">:</span> <span class="token string">"es5"</span><span class="token punctuation">,</span>
+  <span class="token property">"bracketSpacing"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"arrowParens"</span><span class="token operator">:</span> <span class="token string">"avoid"</span><span class="token punctuation">,</span>
+  <span class="token property">"endOfLine"</span><span class="token operator">:</span> <span class="token string">"lf"</span><span class="token punctuation">,</span>
+  <span class="token property">"overrides"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"files"</span><span class="token operator">:</span> <span class="token string">"*.html"</span><span class="token punctuation">,</span>
+      <span class="token property">"options"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property">"parser"</span><span class="token operator">:</span> <span class="token string">"html"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre>
+<p>The configuration above already includes Prettier integration with the <code>plugin:prettier/recommended</code> extension.</p>
+<h2>Setting Up Pre-commit Hooks</h2>
+<p>To prevent Schrödinger's Bugs from sneaking into our codebase, we'll set up pre-commit hooks using Husky and lint-staged. Husky intercepts Git commands like <code>commit</code> and <code>push</code>, allowing us to run scripts before they complete. Lint-staged works alongside Husky by running commands only on files that are staged for commit, making the process lightning fast. Together, they create a formidable defense system - Husky catches the commit attempt while lint-staged efficiently processes only what's changed. This means linting and formatting happen automatically before code enters your repository, eliminating those embarrassing &quot;fix formatting&quot; commits that clutter your history. The Ancient Order of Angular considers this combination essential for maintaining codebase sanity:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Summon the guardians of the commit gate</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-D</span> husky lint-staged</code></pre>
+<p>Initialize Husky:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Initialize the ancient ritual of pre-commit validation</span>
+npx husky init</code></pre>
+<p>Create a <code>.husky/pre-commit</code> file:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token shebang important">#!/bin/sh</span>
+<span class="token builtin class-name">.</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token string">"<span class="token variable">$0</span>"</span><span class="token variable">)</span></span>/_/husky.sh"</span>
+
+npx lint-staged</code></pre>
+<p>Now, configure lint-staged in your <code>package.json</code>:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"lint-staged"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"*.{ts,html}"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"eslint --fix"</span><span class="token punctuation">,</span> <span class="token string">"prettier --write"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token property">"*.{css,scss}"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"prettier --write"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token property">"*.{json,md}"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"prettier --write"</span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Adding Scripts to package.json</h2>
+<p>Let's add some helpful scripts to our <code>package.json</code>:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"scripts"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ... existing scripts</span>
+    <span class="token property">"lint"</span><span class="token operator">:</span> <span class="token string">"eslint \"src/**/*.{ts,html}\""</span><span class="token punctuation">,</span>
+    <span class="token property">"lint:fix"</span><span class="token operator">:</span> <span class="token string">"eslint \"src/**/*.{ts,html}\" --fix"</span><span class="token punctuation">,</span>
+    <span class="token property">"format"</span><span class="token operator">:</span> <span class="token string">"prettier --write \"src/**/*.{ts,html,scss,json,md}\""</span><span class="token punctuation">,</span>
+    <span class="token property">"format:check"</span><span class="token operator">:</span> <span class="token string">"prettier --check \"src/**/*.{ts,html,scss,json,md}\""</span><span class="token punctuation">,</span>
+    <span class="token property">"prepare"</span><span class="token operator">:</span> <span class="token string">"husky install"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Integrating with VS Code</h2>
+<p>To ensure the Cosmic Compiler's blessings extend to our development environment, let's configure VS Code:</p>
+<p>Create a <code>.vscode/settings.json</code> file:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"editor.formatOnSave"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"editor.codeActionsOnSave"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"source.fixAll.eslint"</span><span class="token operator">:</span> <span class="token string">"explicit"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"editor.defaultFormatter"</span><span class="token operator">:</span> <span class="token string">"esbenp.prettier-vscode"</span><span class="token punctuation">,</span>
+  <span class="token property">"[typescript]"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"editor.defaultFormatter"</span><span class="token operator">:</span> <span class="token string">"esbenp.prettier-vscode"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"[html]"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"editor.defaultFormatter"</span><span class="token operator">:</span> <span class="token string">"esbenp.prettier-vscode"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"[scss]"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"editor.defaultFormatter"</span><span class="token operator">:</span> <span class="token string">"esbenp.prettier-vscode"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"eslint.validate"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"typescript"</span><span class="token punctuation">,</span> <span class="token string">"html"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"prettier.documentSelectors"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"**/*.{ts,js,html,scss,css,json,md}"</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Don't forget to install the necessary VS Code extensions:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Install the sacred extensions</span>
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension esbenp.prettier-vscode
+code --install-extension angular.ng-template</code></pre>
+<h2>Example Lint Fixes</h2>
+<p>Let's see how our setup helps us avoid the Void of Undefined and other coding perils:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Before: A code snippet that would anger the Cosmic Compiler</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">GalacticService</span> <span class="token punctuation">{</span>
+  <span class="token function">fetchData</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// No return type! The horror!</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>http<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"/api/planets"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+      <span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token comment">// Implicit any! The Cosmic Compiler weeps!</span>
+        <span class="token keyword">return</span> data<span class="token punctuation">.</span>results<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// After: Code that pleases the Ancient Order of Angular</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">GalacticService</span> <span class="token punctuation">{</span>
+  <span class="token function">fetchData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>Planet<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>http<span class="token punctuation">.</span><span class="token generic-function"><span class="token function">get</span><span class="token generic class-name"><span class="token operator">&lt;</span>PlanetResponse<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token string">"/api/planets"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+      <span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>data<span class="token operator">:</span> PlanetResponse<span class="token punctuation">)</span><span class="token operator">:</span> Planet<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> data<span class="token punctuation">.</span>results<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>The Benefits of Our Setup</h2>
+<p>With our code quality guardians in place:</p>
+<ol>
+<li><strong>Consistent Formatting</strong>: No more debates about tabs vs. spaces or where to put those pesky curly braces</li>
+<li><strong>Automatic Error Prevention</strong>: Catch potential issues before they become Schrödinger's Bugs</li>
+<li><strong>Enforced Best Practices</strong>: Follow the wisdom of the Ancient Order of Angular</li>
+<li><strong>Improved Collaboration</strong>: Everyone's code looks like it was written by the same developer</li>
+<li><strong>Cleaner Git History</strong>: No more commits that just fix formatting</li>
+</ol>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>set up ESLint</strong> with Angular-specific rules to enforce code quality standards</li>
+<li>We've <strong>configured Prettier</strong> to ensure consistent code formatting across the project</li>
+<li>We've <strong>integrated ESLint and Prettier</strong> to work together harmoniously</li>
+<li>We've <strong>established pre-commit hooks</strong> with Husky and lint-staged to prevent bad code from entering our repository</li>
+<li>We've <strong>configured VS Code</strong> to automatically format and lint our code as we work</li>
+</ul>
+<p><em>In our next transmission, we'll dive into creating the Star Wars API service, where we'll establish contact with the distant SWAPI galaxy. The Recursive Philosopher reminds us that &quot;to fetch data, one must first understand what data is.&quot; Profound, if somewhat unhelpful in practice.</em></p>
+<p><em>May your linters be strict and your formatters consistent.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-1-basic-project-setup/">← Previous</a>
+        
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+ |         <a href="/musings/post-3-testing-setup/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

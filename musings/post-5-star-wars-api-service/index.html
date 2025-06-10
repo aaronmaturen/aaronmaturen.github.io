@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Creating a service to interact with the Star Wars API (SWAPI)" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Angular DataSource with SWAPI: Building the Galactic Archives - Star Wars API Service</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 5 star wars api service</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Star Wars API Service</h1>
+  <p class="subtitle">June 6, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-5" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-5" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Star Wars API Service</h1>
+<p><em>In a dimension where APIs communicate through quantum entanglement rather than HTTP requests, developers would still need to handle error states. Unfortunately, in our reality, we're stuck with REST endpoints, JSON parsing, and the occasional 503 Service Unavailable that arrives precisely when you're demoing to stakeholders.</em></p>
+<h2>Establishing Contact with the SWAPI Galaxy</h2>
+<p>Before we can build our magnificent DataSource, we need a reliable communication channel to the Star Wars API (SWAPI). This will serve as the foundation for our Galactic Archives, providing the raw data we'll eventually transform and display.</p>
+<p>The Ancient Order of Angular has long taught that proper service implementation follows three sacred principles: strong typing, robust error handling, and environment-specific configuration. Today, we'll honor these traditions.</p>
+<h2>Creating Interfaces for Galactic Data</h2>
+<p>First, let's define the structure of our data using TypeScript interfaces. The Cosmic Compiler particularly appreciates well-defined types. We'll be using the swapi.tech API which has a slightly different structure than the original swapi.dev API:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/models/character.model.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ApiResponse<span class="token punctuation">,</span> ApiDetailResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./api-response.model"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Character list item in results array</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CharacterListItem</span> <span class="token punctuation">{</span>
+  uid<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  name<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  url<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">// For expanded=true responses</span>
+  properties<span class="token operator">?</span><span class="token operator">:</span> Character<span class="token punctuation">;</span>
+  description<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  _id<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  __v<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Full character details</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Character</span> <span class="token punctuation">{</span>
+  name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  height<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  mass<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  hair_color<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  skin_color<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  eye_color<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  birth_year<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  gender<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  homeworld<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  created<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  edited<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  url<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// src/app/models/api-response.model.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ApiResponse</span> <span class="token punctuation">{</span>
+  message<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  total_records<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  total_pages<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  previous<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+  next<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+  results<span class="token operator">:</span> CharacterListItem<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ApiDetailResponse</span> <span class="token punctuation">{</span>
+  message<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  result<span class="token operator">:</span> <span class="token punctuation">{</span>
+    properties<span class="token operator">:</span> Character<span class="token punctuation">;</span>
+    description<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    _id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    uid<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    __v<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Export type aliases for our specific use cases</span>
+<span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">CharacterResponse</span> <span class="token operator">=</span> ApiResponse<span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">CharacterDetailResponse</span> <span class="token operator">=</span> ApiDetailResponse<span class="token punctuation">;</span></code></pre>
+<p>Notice how we've created separate interfaces for the list response and detail response. The swapi.tech API has a different structure than the original SWAPI, and we need to account for that. We've also added support for the <code>expanded=true</code> parameter, which allows us to get full character details in a single request.</p>
+<h2>Setting Up Environment Configuration</h2>
+<p>The Council of Patterns has decreed that API URLs should never be hardcoded. Let's follow their wisdom by setting up environment-specific configuration:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/environments/environment.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> environment <span class="token operator">=</span> <span class="token punctuation">{</span>
+  production<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  apiUrl<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">// src/environments/environment.prod.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> environment <span class="token operator">=</span> <span class="token punctuation">{</span>
+  production<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  apiUrl<span class="token operator">:</span> <span class="token string">"https://www.swapi.tech/api/"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>We're using the swapi.tech API, which is a modern implementation of the Star Wars API with some additional features like the <code>expanded=true</code> parameter. Notice that we include the trailing slash in the URL to ensure proper path construction when making API requests. This small detail prevents the Cosmic Compiler from unleashing its wrath upon us for URL formatting errors.</p>
+<h2>Implementing the Star Wars Service</h2>
+<h3>Modern Dependency Injection with inject()</h3>
+<p>In our implementation, we're using Angular's modern <code>inject()</code> function instead of the traditional constructor injection. This approach was introduced in Angular 14 and is now the recommended way to handle dependency injection in Angular applications.</p>
+<p>The <code>inject()</code> function offers several advantages:</p>
+<ul>
+<li>Cleaner code with less boilerplate</li>
+<li>Better tree-shaking potential</li>
+<li>More flexibility in how dependencies are injected</li>
+<li>Works better with standalone components and services</li>
+</ul>
+<p>The Ancient Order of Angular has decreed that <code>inject()</code> shall be the preferred way forward, and the Cosmic Compiler has been observed to emit fewer warning photons when this pattern is used.</p>
+<p>Now, let's create our service to interact with the swapi.tech API:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/core/services/star-wars.service.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Injectable<span class="token punctuation">,</span> inject <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> HttpClient<span class="token punctuation">,</span> HttpErrorResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common/http"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Observable<span class="token punctuation">,</span> throwError <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"rxjs"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> catchError<span class="token punctuation">,</span> retry<span class="token punctuation">,</span> map <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"rxjs/operators"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> environment <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../environments/environment"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Character<span class="token punctuation">,</span> CharacterListItem <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../models/character.model"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>
+  ApiResponse<span class="token punctuation">,</span>
+  ApiDetailResponse<span class="token punctuation">,</span>
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../models/api-response.model"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Type aliases for our specific use cases</span>
+<span class="token keyword">type</span> <span class="token class-name">CharacterResponse</span> <span class="token operator">=</span> ApiResponse<span class="token operator">&lt;</span>CharacterListItem<span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">CharacterDetailResponse</span> <span class="token operator">=</span> ApiDetailResponse<span class="token operator">&lt;</span>Character<span class="token operator">></span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  providedIn<span class="token operator">:</span> <span class="token string">"root"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">StarWarsService</span> <span class="token punctuation">{</span>
+  <span class="token keyword">private</span> apiUrl <span class="token operator">=</span> environment<span class="token punctuation">.</span>apiUrl<span class="token punctuation">;</span>
+  <span class="token keyword">private</span> http <span class="token operator">=</span> <span class="token function">inject</span><span class="token punctuation">(</span>HttpClient<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Using inject() instead of constructor injection</span>
+
+  <span class="token comment">// Fetch all characters with optional pagination</span>
+  <span class="token function">getCharacters</span><span class="token punctuation">(</span>page <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>CharacterResponse<span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token comment">// The Cosmic Compiler demands proper URL formatting</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>http
+      <span class="token punctuation">.</span><span class="token generic-function"><span class="token function">get</span><span class="token generic class-name"><span class="token operator">&lt;</span>CharacterResponse<span class="token operator">></span></span></span><span class="token punctuation">(</span>
+        <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">people?page=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>page<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;limit=10&amp;expanded=true</span><span class="token template-punctuation string">`</span></span>
+      <span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+        <span class="token function">retry</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// The Cosmic Compiler suggests retrying failed requests</span>
+        <span class="token function">catchError</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>handleError<span class="token punctuation">)</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Fetch a specific character by ID</span>
+  <span class="token function">getCharacter</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>Character<span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>http
+      <span class="token punctuation">.</span><span class="token generic-function"><span class="token function">get</span><span class="token generic class-name"><span class="token operator">&lt;</span>CharacterDetailResponse<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">people/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+        <span class="token function">retry</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>response<span class="token operator">:</span> CharacterDetailResponse<span class="token punctuation">)</span> <span class="token operator">=></span> response<span class="token punctuation">.</span>result<span class="token punctuation">.</span>properties<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">catchError</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>handleError<span class="token punctuation">)</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Search for characters by name</span>
+  <span class="token function">searchCharacters</span><span class="token punctuation">(</span>name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>CharacterResponse<span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>http
+      <span class="token punctuation">.</span><span class="token generic-function"><span class="token function">get</span><span class="token generic class-name"><span class="token operator">&lt;</span>CharacterResponse<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">people?name=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>name<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">catchError</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>handleError<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Error handling method</span>
+  <span class="token keyword">private</span> <span class="token function">handleError</span><span class="token punctuation">(</span>error<span class="token operator">:</span> HttpErrorResponse<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> errorMessage <span class="token operator">=</span> <span class="token string">"Unknown error!"</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>error<span class="token punctuation">.</span>error <span class="token keyword">instanceof</span> <span class="token class-name">ErrorEvent</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token comment">// Client-side errors</span>
+      errorMessage <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Error: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>error<span class="token punctuation">.</span>error<span class="token punctuation">.</span>message<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      <span class="token comment">// Server-side errors</span>
+      errorMessage <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Error Code: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>error<span class="token punctuation">.</span>status<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">\nMessage: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>error<span class="token punctuation">.</span>message<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>errorMessage<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token function">throwError</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>errorMessage<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Our service provides three main methods:</p>
+<ol>
+<li><code>getCharacters()</code> - Fetches a paginated list of characters with expanded details</li>
+<li><code>getCharacter()</code> - Retrieves details for a specific character</li>
+<li><code>searchCharacters()</code> - Searches for characters by name</li>
+</ol>
+<p>Notice the key improvements in our implementation:</p>
+<ul>
+<li>We use the <code>expanded=true</code> parameter to get full character details in a single request</li>
+<li>We include the <code>limit=10</code> parameter to ensure consistent pagination</li>
+<li>URL formatting is carefully handled to avoid double slashes (the apiUrl already includes a trailing slash)</li>
+</ul>
+<p>The Ancient Order of Angular would be pleased with our implementation of reactive patterns and attention to API-specific details.</p>
+<h2>Creating a Simple Display Component</h2>
+<p>To test our service, let's create a simple component to display character data. We'll place this in a feature module for Star Wars components:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/components/character-list/character-list.component.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Component<span class="token punctuation">,</span> OnInit<span class="token punctuation">,</span> inject <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> CommonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatCardModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/card"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatProgressSpinnerModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/progress-spinner"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatButtonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/button"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> StarWarsService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../../core/services/star-wars.service"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Character <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../../models/character.model"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> catchError<span class="token punctuation">,</span> finalize<span class="token punctuation">,</span> map<span class="token punctuation">,</span> <span class="token keyword">of</span> <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"rxjs"</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-character-list"</span><span class="token punctuation">,</span>
+  standalone<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  imports<span class="token operator">:</span> <span class="token punctuation">[</span>
+    CommonModule<span class="token punctuation">,</span>
+    MatCardModule<span class="token punctuation">,</span>
+    MatProgressSpinnerModule<span class="token punctuation">,</span>
+    MatButtonModule<span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  template<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+    &lt;div class="tw-container tw-mx-auto tw-p-4">
+      &lt;h1 class="tw-text-2xl tw-font-bold tw-mb-4">Star Wars Characters&lt;/h1>
+
+      &lt;div *ngIf="loading" class="tw-flex tw-justify-center tw-my-8">
+        &lt;mat-spinner diameter="50">&lt;/mat-spinner>
+      &lt;/div>
+
+      &lt;div
+        *ngIf="error"
+        class="tw-bg-red-100 tw-border-l-4 tw-border-red-500 tw-text-red-700 tw-p-4 tw-mb-4"
+      >
+        
+      &lt;/div>
+
+      &lt;div
+        class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4"
+      >
+        &lt;mat-card
+          *ngFor="let character of characters"
+          class="tw-mb-4 tw-transition-all tw-duration-300 tw-hover:tw-shadow-xl"
+        >
+          &lt;mat-card-header>
+            &lt;mat-card-title>&lt;/mat-card-title>
+            &lt;mat-card-subtitle
+              >Birth Year: &lt;/mat-card-subtitle
+            >
+          &lt;/mat-card-header>
+
+          &lt;mat-card-content class="tw-py-2">
+            &lt;div class="tw-grid tw-grid-cols-2 tw-gap-2">
+              &lt;div class="tw-text-sm">
+                &lt;strong>Height:&lt;/strong> cm
+              &lt;/div>
+              &lt;div class="tw-text-sm">
+                &lt;strong>Mass:&lt;/strong> kg
+              &lt;/div>
+              &lt;div class="tw-text-sm">
+                &lt;strong>Hair:&lt;/strong> 
+              &lt;/div>
+              &lt;div class="tw-text-sm">
+                &lt;strong>Eyes:&lt;/strong> 
+              &lt;/div>
+            &lt;/div>
+          &lt;/mat-card-content>
+
+          &lt;mat-card-actions class="tw-flex tw-justify-end">
+            &lt;button mat-button color="primary">VIEW DETAILS&lt;/button>
+          &lt;/mat-card-actions>
+        &lt;/mat-card>
+      &lt;/div>
+
+      &lt;div class="tw-flex tw-justify-center tw-mt-4">
+        &lt;button
+          mat-button
+          color="primary"
+          [disabled]="loading || !hasNextPage"
+          (click)="loadNextPage()"
+        >
+          LOAD MORE
+        &lt;/button>
+      &lt;/div>
+    &lt;/div>
+  </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  styles<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CharacterListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span> <span class="token punctuation">{</span>
+  characters<span class="token operator">:</span> Character<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  currentPage <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  hasNextPage <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  loading <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  error <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">private</span> starWarsService <span class="token operator">=</span> <span class="token function">inject</span><span class="token punctuation">(</span>StarWarsService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>loading <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>error <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService
+      <span class="token punctuation">.</span><span class="token function">getCharacters</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>currentPage<span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+        <span class="token function">catchError</span><span class="token punctuation">(</span><span class="token punctuation">(</span>error<span class="token operator">:</span> Error<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span>error <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Failed to load characters: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>error<span class="token punctuation">.</span>message<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">. The Cosmic Compiler is displeased.</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+          <span class="token keyword">return</span> <span class="token keyword">of</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            message<span class="token operator">:</span> <span class="token string">"error"</span><span class="token punctuation">,</span>
+            results<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+            total_records<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            total_pages<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            next<span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+            previous<span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+          <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>response<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+          <span class="token comment">// Extract next page number from the next URL if it exists</span>
+          <span class="token keyword">if</span> <span class="token punctuation">(</span>response<span class="token punctuation">.</span>next<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> nextUrl <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token constant">URL</span></span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>next<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">const</span> nextPage <span class="token operator">=</span> nextUrl<span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"page"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>nextPage<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+              <span class="token keyword">this</span><span class="token punctuation">.</span>currentPage <span class="token operator">=</span> <span class="token function">parseInt</span><span class="token punctuation">(</span>nextPage<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// Store the current page (next page - 1)</span>
+            <span class="token punctuation">}</span>
+          <span class="token punctuation">}</span>
+
+          <span class="token keyword">this</span><span class="token punctuation">.</span>hasNextPage <span class="token operator">=</span> <span class="token operator">!</span><span class="token operator">!</span>response<span class="token punctuation">.</span>next<span class="token punctuation">;</span>
+
+          <span class="token comment">// With expanded=true, each result directly contains properties</span>
+          <span class="token keyword">return</span> response<span class="token punctuation">.</span>results
+            <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span> <span class="token operator">=></span> item<span class="token punctuation">.</span>properties<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>char<span class="token punctuation">)</span><span class="token operator">:</span> char <span class="token keyword">is</span> Character <span class="token operator">=></span> char <span class="token operator">!==</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">finalize</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>loading <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span>characters<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>characters<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span>characters <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>characters<span class="token punctuation">,</span> <span class="token operator">...</span>characters<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">loadNextPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>hasNextPage <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>loading<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>currentPage<span class="token operator">++</span><span class="token punctuation">;</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Registering Our Feature Module</h2>
+<p>To make our component accessible, we need to update our app routes:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/app.routes.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Routes <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/router"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> routes<span class="token operator">:</span> Routes <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span> path<span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span> redirectTo<span class="token operator">:</span> <span class="token string">"characters"</span><span class="token punctuation">,</span> pathMatch<span class="token operator">:</span> <span class="token string">"full"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    path<span class="token operator">:</span> <span class="token string">"characters"</span><span class="token punctuation">,</span>
+    <span class="token function-variable function">loadComponent</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+      <span class="token keyword">import</span><span class="token punctuation">(</span>
+        <span class="token string">"./features/star-wars/components/character-list/character-list.component"</span>
+      <span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span>m<span class="token punctuation">)</span> <span class="token operator">=></span> m<span class="token punctuation">.</span>CharacterListComponent<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
+<h2>Setting Up the HTTP Client</h2>
+<p>Don't forget to provide the HttpClient in your app configuration:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/app.config.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ApplicationConfig <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> provideRouter <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/router"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> provideAnimations <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/platform-browser/animations"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>
+  provideHttpClient<span class="token punctuation">,</span>
+  withInterceptorsFromDi<span class="token punctuation">,</span>
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common/http"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{</span> routes <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app.routes"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> appConfig<span class="token operator">:</span> ApplicationConfig <span class="token operator">=</span> <span class="token punctuation">{</span>
+  providers<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token function">provideRouter</span><span class="token punctuation">(</span>routes<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">provideAnimations</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">provideHttpClient</span><span class="token punctuation">(</span><span class="token function">withInterceptorsFromDi</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// The Cosmic Compiler demands HTTP capabilities</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<h2>Testing Our Implementation</h2>
+<p>With everything in place, let's run our application and see the results:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Launch the application into hyperspace</span>
+ng serve</code></pre>
+<p>Navigate to <code>http://localhost:4200</code>, and you should see a list of Star Wars characters loaded from the API. The &quot;Load More&quot; button will fetch additional pages of data when clicked.</p>
+<h2>Handling Pagination with swapi.tech API</h2>
+<p>One important aspect of our implementation is proper pagination handling. The swapi.tech API returns pagination information in a specific format that requires careful handling:</p>
+<ol>
+<li>The API response includes a <code>next</code> property with the full URL for the next page</li>
+<li>We extract the page number from this URL to ensure we're correctly tracking pagination</li>
+<li>We include both <code>page</code> and <code>limit</code> parameters in our requests to ensure consistent results</li>
+</ol>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Extract next page number from the next URL if it exists</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>response<span class="token punctuation">.</span>next<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> nextUrl <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token constant">URL</span></span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>next<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> nextPage <span class="token operator">=</span> nextUrl<span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"page"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>nextPage<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>currentPage <span class="token operator">=</span> <span class="token function">parseInt</span><span class="token punctuation">(</span>nextPage<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// Store the current page (next page - 1)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>This approach ensures that our &quot;Load More&quot; button correctly fetches subsequent pages of data rather than repeatedly loading the first page.</p>
+<h2>Using the expanded=true Parameter</h2>
+<p>Another key optimization in our implementation is the use of the <code>expanded=true</code> parameter. This allows us to get full character details in a single request, eliminating the need for additional API calls to fetch details for each character.</p>
+<p>With this parameter, each result in the API response includes a <code>properties</code> object with all character details:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// With expanded=true, each result directly contains properties</span>
+<span class="token keyword">return</span> response<span class="token punctuation">.</span>results
+  <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span> <span class="token operator">=></span> item<span class="token punctuation">.</span>properties<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>char<span class="token punctuation">)</span><span class="token operator">:</span> char <span class="token keyword">is</span> Character <span class="token operator">=></span> char <span class="token operator">!==</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>This significantly improves performance by reducing the number of HTTP requests needed to display character data.</p>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>created TypeScript interfaces</strong> for the swapi.tech API response structure, pleasing the Cosmic Compiler with proper typing</li>
+<li>We've <strong>implemented environment configuration</strong> for API URLs, following the Council of Patterns' recommendations</li>
+<li>We've <strong>built a robust Star Wars service</strong> with proper error handling and pagination support</li>
+<li>We've <strong>optimized API requests</strong> using the expanded=true parameter to get full character details in a single request</li>
+<li>We've <strong>created a component</strong> with proper pagination handling to display character data</li>
+<li>We've <strong>followed feature-based architecture principles</strong> by organizing our code into core and feature modules</li>
+</ul>
+<p><em>In our next transmission, we'll explore the mystical art of API mocking with Mock Service Worker (MSW). The Dependency Demons often disrupt external API connections during testing, but MSW offers a powerful shield against their mischief. As the Recursive Philosopher might say, &quot;To test an API service properly, one must first pretend the API doesn't exist at all.&quot;</em></p>
+<p><em>May your HTTP requests return 200 OK, your observables never go unsubscribed, and your pagination always work correctly.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-4-feature-based-architecture/">← Previous</a>
+        
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+ |         <a href="/musings/post-6-api-mocking-msw/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

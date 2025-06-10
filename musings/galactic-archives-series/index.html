@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A comprehensive guide to building Angular data sources with SWAPI" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Galactic Archives Series</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Galactic archives series</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Galactic Archives Series</h1>
+  <p class="subtitle">June 8, 2025</p>
+  
+</header>
+
+<main>
+  <article>
+    <h1>Galactic Archives Series</h1>
+<p><em>A comprehensive guide to building efficient data sources in Angular using the Star Wars API.</em></p>
+<p>This series explores advanced patterns for handling paginated data in Angular applications. Using the Star Wars API (SWAPI) as our data source, we'll build a robust, reusable solution for displaying and navigating large datasets.</p>
+<h2>What You'll Learn</h2>
+<ul>
+<li>Creating custom data sources in Angular</li>
+<li>Handling paginated APIs efficiently</li>
+<li>Implementing virtual scrolling</li>
+<li>Managing complex state with RxJS</li>
+<li>Building reusable, testable components</li>
+</ul>
+<h2>Table of Contents</h2>
+<h3>Foundation Phase</h3>
+<ol>
+<li><a href="/musings/post-0-introduction/">Introduction</a> - Introduces the DataSource pattern concept and outlines the plan to build a Star Wars data explorer application called &quot;Galactic Archives&quot;</li>
+<li><a href="/musings/post-1-basic-project-setup/">Basic Project Setup</a> - Creates the Angular v18 project with standalone components, sets up Angular Material and Tailwind CSS with <code>tw-</code> prefix, and implements a basic app shell</li>
+<li><a href="/musings/post-2-code-quality-setup/">Code Quality Setup</a> - Implements Husky and lint-staged for pre-commit hooks to ensure code quality</li>
+<li><a href="/musings/post-3-testing-setup/">Testing Setup</a> - Configures Jest for unit/integration testing and Playwright for E2E testing</li>
+</ol>
+<h3>Architecture Phase</h3>
+<ol start="5">
+<li><a href="/musings/post-4-feature-based-architecture/">Feature-Based Architecture</a> - Reorganizes the application using a feature-based architecture with core, features, shared, and models directories</li>
+<li><a href="/musings/post-5-star-wars-api-service/">Star Wars API Service</a> - Implements the StarWarsService to interact with the SWAPI API</li>
+<li><a href="/musings/post-6-api-mocking-with-msw/">API Mocking with MSW</a> - Sets up Mock Service Worker for API mocking during development and testing</li>
+</ol>
+<h3>Core DataSource Implementation Phase</h3>
+<ol start="8">
+<li><a href="/musings/post-7-datasource-foundation/">DataSource Foundation</a> - Implements the core GalacticDataSource class extending Angular's DataSource</li>
+<li><a href="/musings/post-8-implementing-pagination/">Implementing Pagination</a> - Adds pagination to the DataSource and implements MatTable with MatPaginator</li>
+<li><a href="/musings/post-9-adding-sorting/">Adding Sorting</a> - Enhances the DataSource with sorting capabilities using MatSort</li>
+<li><a href="/musings/post-10-implementing-filtering/">Implementing Filtering</a> - Adds filtering functionality to the DataSource with debouncing</li>
+</ol>
+<h3>UI Enhancement Phase</h3>
+<ol start="12">
+<li><a href="/musings/post-11-star-wars-theming/">Star Wars Theming</a> - Customizes the Angular Material theme with Star Wars-inspired colors</li>
+<li><a href="/musings/post-12-responsive-design/">Responsive Design</a> - Makes the application fully responsive across different device sizes</li>
+<li><a href="/musings/post-13-keyboard-navigation/">Keyboard Navigation</a> - Improves accessibility with keyboard navigation support</li>
+<li><a href="/musings/post-14-high-contrast-mode/">High Contrast Mode</a> - Adds support for high contrast mode for visually impaired users</li>
+<li><a href="/musings/post-15-loading-states-and-ux/">Loading States and UX</a> - Enhances user experience with better loading states and indicators</li>
+</ol>
+<h3>Testing and Deployment Phase</h3>
+<ol start="17">
+<li><a href="/musings/post-16-testing-datasource/">Testing DataSource</a> - Implements comprehensive tests for the DataSource using Jest and MSW</li>
+<li><a href="/musings/post-17-deployment-optimization/">Deployment Optimization</a> - Optimizes the application for production with bundle analysis, service worker implementation, and advanced caching</li>
+<li><a href="/musings/post-18-cicd-with-github-actions/">CI/CD with GitHub Actions</a> - Sets up continuous integration and deployment pipelines</li>
+<li><a href="/musings/post-19-future-directions/">Future Directions and Advanced Patterns</a> - Explores hypothetical improvements including Angular Signals, NgRx integration, advanced caching strategies, and performance optimizations</li>
+</ol>
+<h2>Prerequisites</h2>
+<ul>
+<li>Basic knowledge of Angular and TypeScript</li>
+<li>Familiarity with RxJS observables</li>
+<li>Understanding of HTTP client operations</li>
+</ul>
+<h2>Project Evolution Overview</h2>
+<p>This document provides an analysis of the blog post series, demonstrating how each post builds incrementally on the previous one to create a complete Angular application implementing the DataSource pattern with the Star Wars API.</p>
+<p>Join me on this journey through the galaxy of Angular data management, where we'll tackle common challenges and build solutions that you can apply to your own projects.</p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        
+        <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+      <p class="github-links">
+        <a href="https://github.com/aaronmaturen/galactic-archive" target="_blank" rel="noopener">View on GitHub</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

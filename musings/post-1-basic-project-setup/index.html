@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Setting up the foundation for our Angular project with the right tools and structure" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Angular DataSource with SWAPI: Building the Galactic Archives - Basic Project Setup</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 1 basic project setup</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Basic Project Setup</h1>
+  <p class="subtitle">June 2, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-1" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-1" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Basic Project Setup</h1>
+<p><em>In a universe where frameworks multiply faster than tribbles on a grain barge, setting up a new Angular project remains a ritual as ancient as the first <code>npm install</code>. Some say the Ancient Order of Angular created the CLI during a particularly productive full moon, while others insist it emerged fully formed from a quantum fluctuation in the npm registry.</em></p>
+<h2>The Foundation of Our Galactic Archives</h2>
+<p>Before we can build our magnificent Star Wars data explorer, we need to establish a base of operations. Like any good rebel outpost, our project requires proper infrastructure, defensive shields (error handling), and a sleek command center (UI).</p>
+<p>The Cosmic Compiler watches with interest as we lay the groundwork for what will become the most comprehensive archive of galactic data this side of the Outer Rim.</p>
+<h2>Creating a New Angular Project</h2>
+<p>Let's summon the power of the Angular CLI to create our project:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Invoke the ancient incantation to create a new Angular project with version 18</span>
+<span class="token comment"># The Cosmic Compiler appreciates descriptive project names</span>
+<span class="token function">npm</span> i <span class="token parameter variable">-g</span> @angular/cli@18.2.19
+ng new galactic-archives <span class="token parameter variable">--routing</span> <span class="token parameter variable">--style</span><span class="token operator">=</span>scss --skip-tests<span class="token operator">=</span>false <span class="token parameter variable">--strict</span> <span class="token parameter variable">--standalone</span>
+
+<span class="token comment"># Navigate to the newly created dimensional pocket</span>
+<span class="token builtin class-name">cd</span> galactic-archives</code></pre>
+<p>When prompted, answer &quot;Yes&quot; to Angular routing (we'll need hyperspace travel between components) and select SCSS as the stylesheet format (the Galactic Standards Committee strongly prefers it over plain CSS).</p>
+<h2>Project Structure</h2>
+<p>The CLI has conjured a basic project structure for us, but we'll need to adapt it to follow the feature-based architecture prophecied in the TypeScript Prophecies:</p>
+<pre><code>galactic-archives/
+├── src/
+│   ├── app/
+│   │   ├── app.routes.ts      // Standalone routing configuration
+│   │   ├── app.config.ts      // Application configuration and providers
+│   │   ├── app.component.html
+│   │   ├── app.component.scss
+│   │   └── app.component.ts   // Standalone component
+│   ├── assets/
+│   ├── main.ts               // Application bootstrap
+│   └── index.html
+├── angular.json
+├── package.json
+└── tsconfig.json
+</code></pre>
+<h2>Installing Angular Material</h2>
+<p>No self-respecting galactic archive would be caught without the sleek, professional components of Angular Material. Let's add this to our arsenal:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Summon the Material design entities to our dimension</span>
+ng <span class="token function">add</span> @angular/material</code></pre>
+<p>When prompted:</p>
+<ul>
+<li>Choose a theme (I recommend &quot;Custom&quot; for our Star Wars theme later)</li>
+<li>Select &quot;Yes&quot; for Angular Material typography</li>
+<li>Select &quot;Yes&quot; for browser animations</li>
+</ul>
+<p>The Material setup wizard is like a helpful protocol droid—slightly annoying but ultimately saving you from hours of manual configuration.</p>
+<h2>Adding Tailwind CSS</h2>
+<p>While Material provides excellent components, Tailwind CSS gives us the utility-first approach that the Council of Patterns has been advocating for eons. By prefixing Tailwind classes with <code>tw-</code>, we avoid conflicts with Material's styles while maintaining a clear separation of concerns. Material handles the complex components like tables and dialogs, while Tailwind handles spacing, colors, and responsive design without writing custom CSS. This combination lets us rapidly prototype layouts directly in templates while keeping our bundle size smaller by avoiding unnecessary custom styles. The Cosmic Compiler particularly appreciates this organized approach.</p>
+<p>Here's a practical example of how Material and Tailwind work together in a component:</p>
+<pre class="language-html"><code class="language-html"><span class="token comment">&lt;!-- Character card component using both Material and Tailwind --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card</span>
+  <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-mb-4 tw-transition-all tw-duration-300 tw-hover:tw-shadow-xl<span class="token punctuation">"</span></span>
+<span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-header</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-title</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-xl tw-font-bold tw-text-primary<span class="token punctuation">"</span></span>
+      <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-title</span>
+    <span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-subtitle</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-secondary<span class="token punctuation">"</span></span>
+      <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-subtitle</span>
+    <span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-header</span><span class="token punctuation">></span></span>
+
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-content</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-py-2<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-grid tw-grid-cols-2 tw-gap-2<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-sm<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>strong</span><span class="token punctuation">></span></span>Height:<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>strong</span><span class="token punctuation">></span></span> cm
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-sm<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>strong</span><span class="token punctuation">></span></span>Mass:<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>strong</span><span class="token punctuation">></span></span> kg
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-content</span><span class="token punctuation">></span></span>
+
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-actions</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-flex tw-justify-end<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">mat-button</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>primary<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-font-medium<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      VIEW DETAILS
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">mat-icon-button</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-ml-2<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-icon</span><span class="token punctuation">></span></span>favorite_border<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-icon</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-actions</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card</span><span class="token punctuation">></span></span></code></pre>
+<p>In this example, we're using Material's <code>mat-card</code> component structure while enhancing it with Tailwind's utility classes for spacing, transitions, hover effects, grid layout, and text styling - all without writing a single line of custom CSS.</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Install Tailwind CSS and its dependencies</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-D</span> tailwindcss postcss autoprefixer
+
+<span class="token comment"># Initialize Tailwind CSS configuration</span>
+npx tailwindcss init</code></pre>
+<p>Now, let's configure Tailwind to work with our Angular project. Create or update the following files:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// tailwind.config.js</span>
+<span class="token comment">/** @type {import('tailwindcss').Config} */</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">prefix</span><span class="token operator">:</span> <span class="token string">"tw-"</span><span class="token punctuation">,</span> <span class="token comment">// The Galactic Standards Committee requires prefixing to avoid conflicts</span>
+  <span class="token literal-property property">content</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token string">"./src/**/*.{html,ts}"</span><span class="token punctuation">,</span> <span class="token comment">// Scan all our HTML and TypeScript files</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">theme</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">extend</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token comment">// We'll add our Star Wars theme colors later</span>
+      <span class="token comment">// The Void of Undefined currently occupies this space</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">plugins</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>Next, update your <code>src/styles.scss</code> file:</p>
+<pre class="language-scss"><code class="language-scss"><span class="token comment">/* You can add global styles to this file, and also import other style files */</span>
+@tailwind base<span class="token punctuation">;</span>
+@tailwind components<span class="token punctuation">;</span>
+@tailwind utilities<span class="token punctuation">;</span>
+
+<span class="token comment">// The Ancient Order of Angular recommends keeping global styles minimal</span>
+<span class="token comment">// Most styling should be component-specific or utility-based</span></code></pre>
+<h2>Creating a Basic App Shell</h2>
+<p>Now, let's create a simple app shell with a header and footer. This will serve as the command center for our Galactic Archives:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// app.component.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Component <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-root"</span><span class="token punctuation">,</span>
+  templateUrl<span class="token operator">:</span> <span class="token string">"./app.component.html"</span><span class="token punctuation">,</span>
+  styleUrls<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"./app.component.scss"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppComponent</span> <span class="token punctuation">{</span>
+  title <span class="token operator">=</span> <span class="token string">"Galactic Archives"</span><span class="token punctuation">;</span> <span class="token comment">// The name of our noble endeavor</span>
+
+  <span class="token comment">// The Cosmic Compiler appreciates well-named methods</span>
+  <span class="token function">getCurrentYear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getFullYear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Time is an illusion, but copyright dates are not</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Update the HTML template:</p>
+<pre class="language-html"><code class="language-html"><span class="token comment">&lt;!-- app.component.html --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-flex tw-flex-col tw-min-h-screen<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token comment">&lt;!-- Header: Command center of our application --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>header</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-bg-gray-900 tw-text-white tw-p-4 tw-shadow-md<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span>
+      <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-container tw-mx-auto tw-flex tw-justify-between tw-items-center<span class="token punctuation">"</span></span>
+    <span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-xl tw-font-bold<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Angular DataSource with SWAPI: Building the Galactic Archives - Basic Project Setup<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nav</span><span class="token punctuation">></span></span>
+        <span class="token comment">&lt;!-- Navigation will be added in a future episode --></span>
+        <span class="token comment">&lt;!-- The Inevitable Refactor looms on the horizon --></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nav</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>header</span><span class="token punctuation">></span></span>
+
+  <span class="token comment">&lt;!-- Main content area: Where the magic happens --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>main</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-container tw-mx-auto tw-flex-grow tw-p-4<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token comment">&lt;!-- Router outlet: A portal to other dimensions (components) --></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>router-outlet</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>router-outlet</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>main</span><span class="token punctuation">></span></span>
+
+  <span class="token comment">&lt;!-- Footer: Every good application needs a footer --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>footer</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-bg-gray-900 tw-text-white tw-p-4 tw-mt-auto<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-container tw-mx-auto tw-text-center<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>
+        © {{ getCurrentYear() }} Galactic Archives | Built
+        with Angular by the Rebel Alliance
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>footer</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span></code></pre>
+<h2>Setting Up Standalone Components</h2>
+<p>Angular v18 uses the standalone components approach, which is a significant shift from the previous NgModule-based architecture. In the old days (pre-v14), components had to be declared in an NgModule before they could be used, creating a complex web of module dependencies that often led to what the Ancient Order called &quot;ModuleMadness™&quot;.</p>
+<p>With standalone components, each component declares its own dependencies directly, eliminating the need for NgModules in many cases. This means:</p>
+<ol>
+<li>No more <code>declarations</code> arrays listing every component</li>
+<li>No more importing feature modules just to use a single component</li>
+<li>Direct imports of the components you need, when you need them</li>
+<li>Simpler lazy-loading without module wrappers</li>
+</ol>
+<p>Instead of having an <code>AppModule</code> with declarations, imports, and providers, we now have a more streamlined approach with <code>app.config.ts</code> handling application-wide providers and each component managing its own dependencies.</p>
+<p>Let's update our <code>app.component.ts</code> to use the standalone approach and create a proper <code>app.config.ts</code>:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// app.component.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Component <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> RouterOutlet <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/router"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Import basic Material modules</span>
+<span class="token comment">// The Ancient Order of Angular recommends importing only what you need</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatToolbarModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/toolbar"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatButtonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/button"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatIconModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/icon"</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-root"</span><span class="token punctuation">,</span>
+  standalone<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// The Cosmic Compiler rejoices at standalone components</span>
+  imports<span class="token operator">:</span> <span class="token punctuation">[</span>RouterOutlet<span class="token punctuation">,</span> MatToolbarModule<span class="token punctuation">,</span> MatButtonModule<span class="token punctuation">,</span> MatIconModule<span class="token punctuation">]</span><span class="token punctuation">,</span>
+  templateUrl<span class="token operator">:</span> <span class="token string">"./app.component.html"</span><span class="token punctuation">,</span>
+  styleUrls<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"./app.component.scss"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppComponent</span> <span class="token punctuation">{</span>
+  title <span class="token operator">=</span> <span class="token string">"Galactic Archives"</span><span class="token punctuation">;</span> <span class="token comment">// The name of our noble endeavor</span>
+
+  <span class="token comment">// The Cosmic Compiler appreciates well-named methods</span>
+  <span class="token function">getCurrentYear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getFullYear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Time is an illusion, but copyright dates are not</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Now, let's create the application configuration file that sets up providers and bootstraps our app:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// app.config.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ApplicationConfig <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> provideRouter <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/router"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> provideAnimations <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/platform-browser/animations"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{</span> routes <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app.routes"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> appConfig<span class="token operator">:</span> ApplicationConfig <span class="token operator">=</span> <span class="token punctuation">{</span>
+  providers<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token function">provideRouter</span><span class="token punctuation">(</span>routes<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">provideAnimations</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// The Ancient Order requires animations for a proper UI experience</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>Finally, let's update the <code>main.ts</code> file to bootstrap our application:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// main.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> bootstrapApplication <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/platform-browser"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> appConfig <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app/app.config"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> AppComponent <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app/app.component"</span><span class="token punctuation">;</span>
+
+<span class="token function">bootstrapApplication</span><span class="token punctuation">(</span>AppComponent<span class="token punctuation">,</span> appConfig<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=></span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"The Cosmic Compiler encountered an error:"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h2>Running the Application</h2>
+<p>With our basic setup complete, let's fire up the hyperdrive and see our creation:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Launch the application into development space</span>
+ng serve <span class="token parameter variable">--open</span></code></pre>
+<p>If all goes well (and the Dependency Demons haven't been messing with your node_modules), your browser should open to <code>http://localhost:4200</code> displaying our basic Galactic Archives shell.</p>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>created a new Angular project</strong> using the CLI, the preferred tool of the Ancient Order of Angular</li>
+<li>We've <strong>installed Angular Material</strong> for sleek, professional UI components</li>
+<li>We've <strong>added Tailwind CSS</strong> for utility-first styling with the <code>tw-</code> prefix to avoid conflicts</li>
+<li>We've <strong>created a basic app shell</strong> with header and footer using our new tools</li>
+<li>We've <strong>set up the foundation</strong> for our feature-based architecture</li>
+</ul>
+<p><em>In our next transmission, we'll establish proper code quality standards with ESLint and Prettier. The Galactic Standards Committee has been known to dispatch inspectors without warning, so we'd best be prepared. As the Recursive Philosopher says, &quot;Good code is its own documentation, but good documentation is... good code?&quot;</em></p>
+<p><em>May your builds be swift and your runtime errors few.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-0-introduction/">← Previous</a>
+        
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+ |         <a href="/musings/post-2-code-quality-setup/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

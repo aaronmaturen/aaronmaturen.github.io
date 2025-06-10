@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Implementing the DataSource pattern for efficient data management in Angular Material tables" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Angular DataSource with SWAPI: Building the Galactic Archives - DataSource Foundation</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 7 datasource foundation</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - DataSource Foundation</h1>
+  <p class="subtitle">June 8, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-7" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-7" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - DataSource Foundation</h1>
+<p><em>After six transmissions of preparation, we finally arrive at the core of our mission: implementing the legendary DataSource pattern. The Ancient Order of Angular's sacred texts describe it as &quot;the separation that brings clarity&quot; - a pattern designed to bring balance to the chaotic realm of data management in components.</em></p>
+<h2>The Component Data Problem</h2>
+<p>Before diving into the DataSource pattern, let's understand the problem it solves. In typical Angular applications, components often:</p>
+<ol>
+<li>Fetch data directly from services</li>
+<li>Manage loading states</li>
+<li>Handle pagination logic</li>
+<li>Track error states</li>
+<li>Implement sorting and filtering</li>
+</ol>
+<p>This leads to bloated components that violate the Single Responsibility Principle faster than a Sith Lord violates peace treaties.</p>
+<blockquote>
+<p>The Cosmic Compiler once reviewed a component that was handling API calls, pagination, sorting, filtering, and rendering all in one file. It simply printed &quot;No&quot; in the terminal and refused to compile further. Some say that component still sits in a forgotten git branch, a cautionary tale for those who dare to mix concerns.</p>
+</blockquote>
+<h2>Enter the DataSource Pattern</h2>
+<p>The DataSource pattern separates data management from presentation concerns. It's an abstraction that:</p>
+<ol>
+<li>Manages data fetching and state</li>
+<li>Handles pagination, sorting, and filtering</li>
+<li>Exposes observables that components can subscribe to</li>
+<li>Centralizes data-related logic</li>
+</ol>
+<p>Angular's CDK (Component Development Kit) provides a <code>DataSource</code> abstract class that we can extend to create our own implementation.</p>
+<h2>Creating the GalacticDataSource</h2>
+<p>Let's implement our <code>GalacticDataSource</code> class that will power the Galactic Archives:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/datasources/galactic-datasource.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> DataSource <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/cdk/collections"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> BehaviorSubject<span class="token punctuation">,</span> Observable<span class="token punctuation">,</span> Subscription <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"rxjs"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Character <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../models/character.model"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> StarWarsService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../core/services/star-wars.service"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">GalacticDataSource</span> <span class="token keyword">extends</span> <span class="token class-name">DataSource<span class="token operator">&lt;</span>Character<span class="token operator">></span></span> <span class="token punctuation">{</span>
+  <span class="token comment">// Internal subjects to manage state</span>
+  <span class="token keyword">private</span> charactersSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span>Character<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> loadingSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span><span class="token builtin">boolean</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> countSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span><span class="token builtin">number</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> subscription <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Subscription</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Public observables that components can subscribe to</span>
+  <span class="token keyword">public</span> loading$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">public</span> count$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> starWarsService<span class="token operator">:</span> StarWarsService<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">/**
+   * The connect method is called by the table to retrieve the data.
+   * This method is part of the DataSource API and is called when the table
+   * needs the data to display.
+   */</span>
+  <span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>Character<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token comment">// Return the observable that emits the data</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">/**
+   * The disconnect method is called when the table is destroyed.
+   * This method is part of the DataSource API and is called when the table
+   * is removed from the DOM.
+   */</span>
+  <span class="token function">disconnect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Clean up subscriptions and complete subjects</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">/**
+   * Load characters from the API
+   * @param page The page number to load
+   */</span>
+  <span class="token function">loadCharacters</span><span class="token punctuation">(</span>page<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService<span class="token punctuation">.</span><span class="token function">getCharacters</span><span class="token punctuation">(</span>page<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        <span class="token function-variable function">next</span><span class="token operator">:</span> <span class="token punctuation">(</span>response<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+          <span class="token comment">// Extract characters from the response</span>
+          <span class="token keyword">const</span> characters <span class="token operator">=</span> response<span class="token punctuation">.</span>results<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span> <span class="token operator">=></span> item<span class="token punctuation">.</span>properties<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+          <span class="token comment">// Update our subjects with the new data</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>characters<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>total_records<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token function-variable function">error</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+          <span class="token comment">// Handle errors</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Understanding the DataSource Lifecycle</h2>
+<p>The <code>DataSource</code> abstract class requires us to implement two key methods:</p>
+<h3>1. connect()</h3>
+<p>This method is called when a component (typically a table or list) connects to the DataSource. It should return an Observable that emits the data to be displayed. In our implementation, we return the <code>charactersSubject</code> as an observable.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>Character<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h3>2. disconnect()</h3>
+<p>This method is called when the component disconnects from the DataSource (usually when the component is destroyed). It's our chance to clean up any subscriptions or resources to prevent memory leaks.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">disconnect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<blockquote>
+<p>A wise member of the Council of Patterns once said: &quot;A DataSource that doesn't properly implement disconnect() is like a Jedi who doesn't turn off their lightsaber - eventually, something's going to get burned.&quot; The Recursive Philosopher added: &quot;And that something is usually your application's memory.&quot;</p>
+</blockquote>
+<h2>Exposing Observables for Components</h2>
+<p>One of the key benefits of the DataSource pattern is that it exposes observables that components can subscribe to. This allows components to reactively update when data changes.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Internal subjects (private)</span>
+<span class="token keyword">private</span> charactersSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span>Character<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">private</span> loadingSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span><span class="token builtin">boolean</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">private</span> countSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span><span class="token builtin">number</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Public observables (components subscribe to these)</span>
+<span class="token keyword">public</span> loading$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">public</span> count$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>Note that we expose the subjects as observables using the <code>asObservable()</code> method. This prevents components from directly calling <code>next()</code> on our subjects, maintaining proper encapsulation.</p>
+<h2>Using BehaviorSubject for State Management</h2>
+<p>We use <code>BehaviorSubject</code> rather than regular <code>Subject</code> because:</p>
+<ol>
+<li>It requires an initial value, ensuring subscribers always get a value</li>
+<li>It caches the latest value, so new subscribers immediately receive the current state</li>
+<li>It works perfectly for representing the current state of our data</li>
+</ol>
+<p>This is particularly useful for UI components that need to know the current state when they initialize.</p>
+<h2>Basic Usage in a Component</h2>
+<p>Here's a simple example of how a component would use our DataSource:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/components/character-list/character-list.component.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Component<span class="token punctuation">,</span> OnDestroy<span class="token punctuation">,</span> OnInit<span class="token punctuation">,</span> inject <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> CommonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatCardModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/card"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatProgressSpinnerModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/progress-spinner"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatButtonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/button"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> StarWarsService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../../core/services/star-wars.service"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Character <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../../models/character.model"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> GalacticDataSource <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../datasources/galactic-datasource"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Subscription <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"rxjs"</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-character-list"</span><span class="token punctuation">,</span>
+  standalone<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  imports<span class="token operator">:</span> <span class="token punctuation">[</span>
+    CommonModule<span class="token punctuation">,</span>
+    MatCardModule<span class="token punctuation">,</span>
+    MatProgressSpinnerModule<span class="token punctuation">,</span>
+    MatButtonModule<span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  templateUrl<span class="token operator">:</span> <span class="token string">"./character-list.component.html"</span><span class="token punctuation">,</span>
+  styleUrl<span class="token operator">:</span> <span class="token string">"./character-list.component.scss"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CharacterListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span><span class="token punctuation">,</span> OnDestroy <span class="token punctuation">{</span>
+  characters<span class="token operator">:</span> Character<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  currentPage <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  loading <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  totalCount <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">private</span> starWarsService <span class="token operator">=</span> <span class="token function">inject</span><span class="token punctuation">(</span>StarWarsService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> dataSource<span class="token operator">!</span><span class="token operator">:</span> GalacticDataSource<span class="token punctuation">;</span> <span class="token comment">// Using definite assignment assertion</span>
+  <span class="token keyword">private</span> subscription <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Subscription</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Initialize the DataSource</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GalacticDataSource</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Subscribe to the DataSource observables</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>characters <span class="token operator">=</span> data<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span>loading$<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span>isLoading<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>loading <span class="token operator">=</span> isLoading<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span>count$<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>totalCount <span class="token operator">=</span> count<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Load initial data</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">ngOnDestroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Clean up subscriptions</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span><span class="token function">disconnect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>currentPage<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">loadMore</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>currentPage<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">hasMoreData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>characters<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>totalCount<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Notice how the component:</p>
+<ol>
+<li>Creates an instance of our DataSource</li>
+<li>Subscribes to the observables exposed by the DataSource</li>
+<li>Calls methods on the DataSource to load data</li>
+<li>Properly cleans up subscriptions in <code>ngOnDestroy()</code></li>
+</ol>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>created a GalacticDataSource</strong> that extends Angular CDK's DataSource</li>
+<li>We've <strong>implemented connect() and disconnect()</strong> methods as required by the DataSource interface</li>
+<li>We've <strong>set up BehaviorSubjects</strong> to manage data, loading state, and total count</li>
+<li>We've <strong>created a loadCharacters method</strong> that handles data fetching and state updates</li>
+<li>We've <strong>exposed observables</strong> for components to subscribe to</li>
+</ul>
+<blockquote>
+<p>The Ancient Order of Angular maintains that the DataSource pattern is not just about code organization but a philosophical approach to component design. &quot;When a component knows too much about data fetching, it loses focus on its primary purpose: presenting information to users. The DataSource liberates the component from this burden, allowing it to achieve enlightenment,&quot; reads one of their ancient scrolls, found in a dusty GitHub repository.</p>
+</blockquote>
+<p><em>In our next transmission, we'll transition from our simple card layout to a powerful MatTable implementation and expand our GalacticDataSource to handle pagination properly. This will allow users to navigate through the vast database of Star Wars characters with the elegance of a Jedi Master using the Force while showcasing the true power of the DataSource pattern when paired with Material's table components.</em></p>
+<p><em>May your components be lean and your data sources clean.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-6-api-mocking-msw/">← Previous</a>
+        
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
+        
+ |         <a href="/musings/post-8-implementing-pagination/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>
