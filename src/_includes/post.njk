@@ -5,6 +5,13 @@ layout: base.njk
 <header>
   <h1>{{ title }}</h1>
   <p class="subtitle">{{ date | date }}</p>
+  
+  {% if github and github.tag %}
+  <p class="code-links">
+    <a href="https://github.com/{{ github.org }}/{{ github.repo }}/tree/{{ github.tag }}" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/{{ github.org }}/{{ github.repo }}/tree/{{ github.tag }}" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+  {% endif %}
 </header>
 
 <main>
@@ -14,6 +21,39 @@ layout: base.njk
   
   <section>
     <hr>
-    <p><a href="/musings/">← Back to all musings</a></p>
+    
+    {% if seriesId %}
+    <div class="series-navigation">
+      {% set prevPost = part | getPreviousInSeries(seriesId, collections) %}
+      {% set nextPost = part | getNextInSeries(seriesId, collections) %}
+      {% set seriesOverview = seriesId | getSeriesOverview(collections) %}
+      
+      <p>
+        {% if prevPost %}
+        <a href="{{ prevPost.url }}">← Previous</a>
+        {% endif %}
+        
+        {% if seriesOverview %}
+        {% if prevPost %} | {% endif %}
+        <a href="{{ seriesOverview.url }}">Series Overview</a>
+        {% endif %}
+        
+        {% if nextPost %}
+        {% if prevPost or seriesOverview %} | {% endif %}
+        <a href="{{ nextPost.url }}">Next →</a>
+        {% endif %}
+      </p>
+    </div>
+    {% endif %}
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+      {% if github and not github.tag %}
+      <p class="github-links">
+        <a href="https://github.com/{{ github.org }}/{{ github.repo }}" target="_blank" rel="noopener">View on GitHub</a>
+      </p>
+      {% endif %}
+    </div>
   </section>
 </main>

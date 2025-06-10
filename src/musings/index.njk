@@ -9,16 +9,51 @@ title: Musings | Aaron T. Maturen
 </header>
 
 <main>
-  <section>
+  {% if collections.series.length > 0 %}
+  <section class="featured-series">
+    <h2>Featured Series</h2>
+    {% for series in collections.series %}
+      <article>
+        <h3><a href="{{ series.url }}">{{ series.data.title }}</a></h3>
+        <p class="subtitle">{{ series.date | date }}</p>
+        <p>{{ series.data.description }}</p>
+        {% if series.data.postCount %}
+          <p class="series-meta">
+            {{ collections.seriesContent[series.data.seriesId].length }} of {{ series.data.postCount }} parts complete
+          </p>
+        {% elif collections.seriesContent[series.data.seriesId] %}
+          <p class="series-meta">
+            {{ collections.seriesContent[series.data.seriesId].length }}
+            {% if collections.seriesContent[series.data.seriesId].length == 1 %}part{% else %}parts{% endif %}
+          </p>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <section class="all-posts">
+    <h2>All Posts</h2>
     {% if collections.musings %}
       {% for post in collections.musings | reverse %}
-        <article>
-          <h2><a href="{{ post.url }}">{{ post.data.title }}</a></h2>
-          <p class="subtitle">{{ post.date | date }}</p>
-          {% if post.data.description %}
-            <p>{{ post.data.description }}</p>
-          {% endif %}
-        </article>
+        {% if not post.data.tags.includes("series") %}
+          <article>
+            <h3><a href="{{ post.url }}">{{ post.data.title }}</a></h3>
+            <p class="subtitle">{{ post.date | date }}</p>
+            {% if post.data.description %}
+              <p>{{ post.data.description }}</p>
+            {% endif %}
+            {% if post.data.seriesId %}
+              <p class="series-tag">Part of:
+                {% for seriesPost in collections.series %}
+                  {% if seriesPost.data.seriesId == post.data.seriesId %}
+                    <a href="{{ seriesPost.url }}">{{ seriesPost.data.title }}</a>
+                  {% endif %}
+                {% endfor %}
+              </p>
+            {% endif %}
+          </article>
+        {% endif %}
       {% endfor %}
     {% else %}
       <p>No posts yet. Check back soon!</p>
