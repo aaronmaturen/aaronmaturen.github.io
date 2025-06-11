@@ -4,6 +4,7 @@ title: Galactic Archives Series
 description: A comprehensive guide to building Angular data sources with SWAPI
 date: 2025-06-01
 tags:
+  - series
   - angular
   - datasource
   - star-wars-api

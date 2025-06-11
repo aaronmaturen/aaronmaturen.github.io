@@ -1,12 +1,31 @@
 const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
+const pluginRss = require("@11ty/eleventy-plugin-rss");
+const inclusiveLangPlugin = require("@11ty/eleventy-plugin-inclusive-language");
+const purgeCssPlugin = require("eleventy-plugin-purgecss");
 
 module.exports = function (eleventyConfig) {
+  // Add RSS plugin
+  eleventyConfig.addPlugin(pluginRss);
+
+  // Add inclusive language plugin
+  eleventyConfig.addPlugin(inclusiveLangPlugin);
+
+  // Add PurgeCSS plugin
+  eleventyConfig.addPlugin(purgeCssPlugin, {
+    // Optional: Configure the plugin
+    config: {
+      // PurgeCSS options
+      content: ["_site/**/*.html"],
+      css: ["_site/assets/css/**/*.css"],
+      safelist: ["tw-*"], // Safelist Tailwind classes
+    },
+  });
   // Configure Nunjucks to handle code snippets better
   eleventyConfig.setNunjucksEnvironmentOptions({
     autoescape: false,
     throwOnUndefined: false,
     trimBlocks: true,
-    lstripBlocks: true
+    lstripBlocks: true,
   });
   // Add a filter to split strings
   eleventyConfig.addFilter("splitPath", function (str) {
@@ -51,52 +70,63 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addCollection("series", function (collectionApi) {
     return collectionApi.getFilteredByTags("series");
   });
-  
+
   // Create a collection for each series
   eleventyConfig.addCollection("seriesContent", function (collectionApi) {
     const allSeries = {};
     // Get all items with seriesId that are not series overview pages
-    const seriesItems = collectionApi.getAll().filter(item => 
-      item.data.seriesId && !item.data.tags.includes("series")
-    );
-    
+    const seriesItems = collectionApi
+      .getAll()
+      .filter(
+        (item) => item.data.seriesId && !item.data.tags.includes("series")
+      );
+
     // Group by seriesId
-    seriesItems.forEach(item => {
+    seriesItems.forEach((item) => {
       const seriesId = item.data.seriesId;
       if (!allSeries[seriesId]) {
         allSeries[seriesId] = [];
       }
       allSeries[seriesId].push(item);
     });
-    
+
     // Sort each series by part number
-    Object.keys(allSeries).forEach(seriesId => {
+    Object.keys(allSeries).forEach((seriesId) => {
       allSeries[seriesId].sort((a, b) => {
         return (a.data.part || 0) - (b.data.part || 0);
       });
     });
-    
+
     return allSeries;
   });
-  
+
   // Add helper functions for series navigation
-  eleventyConfig.addFilter("getSeriesOverview", function(seriesId, collections) {
-    return collections.series.find(item => item.data.seriesId === seriesId);
-  });
-  
-  eleventyConfig.addFilter("getPreviousInSeries", function(part, seriesId, collections) {
-    const seriesItems = collections.seriesContent[seriesId];
-    if (!seriesItems) return null;
-    
-    return seriesItems.find(item => item.data.part === part - 1);
-  });
-  
-  eleventyConfig.addFilter("getNextInSeries", function(part, seriesId, collections) {
-    const seriesItems = collections.seriesContent[seriesId];
-    if (!seriesItems) return null;
-    
-    return seriesItems.find(item => item.data.part === part + 1);
-  });
+  eleventyConfig.addFilter(
+    "getSeriesOverview",
+    function (seriesId, collections) {
+      return collections.series.find((item) => item.data.seriesId === seriesId);
+    }
+  );
+
+  eleventyConfig.addFilter(
+    "getPreviousInSeries",
+    function (part, seriesId, collections) {
+      const seriesItems = collections.seriesContent[seriesId];
+      if (!seriesItems) return null;
+
+      return seriesItems.find((item) => item.data.part === part - 1);
+    }
+  );
+
+  eleventyConfig.addFilter(
+    "getNextInSeries",
+    function (part, seriesId, collections) {
+      const seriesItems = collections.seriesContent[seriesId];
+      if (!seriesItems) return null;
+
+      return seriesItems.find((item) => item.data.part === part + 1);
+    }
+  );
 
   return {
     dir: {
@@ -105,6 +135,6 @@ module.exports = function (eleventyConfig) {
     },
     templateFormats: ["html", "md", "njk"],
     htmlTemplateEngine: "njk",
-    markdownTemplateEngine: "njk",
+    markdownTemplateEngine: false, // Disable Nunjucks processing for markdown files
   };
 };

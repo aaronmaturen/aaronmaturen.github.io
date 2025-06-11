@@ -216,7 +216,10 @@ Update the HTML template:
   <!-- Footer: Every good application needs a footer -->
   <footer class="tw-bg-gray-900 tw-text-white tw-p-4 tw-mt-auto">
     <div class="tw-container tw-mx-auto tw-text-center">
-      <p>©2025 Galactic Archives | Built with Angular by the Rebel Alliance</p>
+      <p>
+        © {{ getCurrentYear() }} Galactic Archives | Built with Angular by the
+        Rebel Alliance
+      </p>
     </div>
   </footer>
 </div>
