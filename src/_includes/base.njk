@@ -16,6 +16,9 @@
     {% block head %}{% endblock %}
   </head>
   <body>
+    {% if page.url.includes('/musings/') and page.url != '/musings/' %}
+    <div class="progress-container"></div>
+    {% endif %}
     <article>
       {% include "breadcrumbs.njk" %}
       {% block content %}
