@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/css/tufte.min.css" />
     <link rel="stylesheet" href="/assets/css/prism-theme.css" />
     <link rel="stylesheet" href="/assets/css/custom.css" />
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="Aaron T. Maturen's Musings" />
   </head>
   <body>
     <article>
@@ -91,20 +92,20 @@ ng <span class="token function">add</span> @angular/material</code></pre>
 <span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-header</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-title</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-xl tw-font-bold tw-text-primary<span class="token punctuation">"</span></span>
-      <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-title</span>
+      <span class="token punctuation">></span></span>{{ character.name }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-title</span>
     <span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-subtitle</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-secondary<span class="token punctuation">"</span></span>
-      <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-subtitle</span>
+      <span class="token punctuation">></span></span>{{ character.species }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-subtitle</span>
     <span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-header</span><span class="token punctuation">></span></span>
 
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card-content</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-py-2<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-grid tw-grid-cols-2 tw-gap-2<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-sm<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>strong</span><span class="token punctuation">></span></span>Height:<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>strong</span><span class="token punctuation">></span></span> cm
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>strong</span><span class="token punctuation">></span></span>Height:<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>strong</span><span class="token punctuation">></span></span> {{ character.height }}cm
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-sm<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>strong</span><span class="token punctuation">></span></span>Mass:<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>strong</span><span class="token punctuation">></span></span> kg
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>strong</span><span class="token punctuation">></span></span>Mass:<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>strong</span><span class="token punctuation">></span></span> {{ character.mass }}kg
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card-content</span><span class="token punctuation">></span></span>
@@ -174,7 +175,7 @@ module<span class="token punctuation">.</span>exports <span class="token operato
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span>
       <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-container tw-mx-auto tw-flex tw-justify-between tw-items-center<span class="token punctuation">"</span></span>
     <span class="token punctuation">></span></span>
-      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-xl tw-font-bold<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Galactic Archives - Basic Project Setup<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-xl tw-font-bold<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ title }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span>
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nav</span><span class="token punctuation">></span></span>
         <span class="token comment">&lt;!-- Navigation will be added in a future episode --></span>
         <span class="token comment">&lt;!-- The Inevitable Refactor looms on the horizon --></span>
@@ -191,7 +192,10 @@ module<span class="token punctuation">.</span>exports <span class="token operato
   <span class="token comment">&lt;!-- Footer: Every good application needs a footer --></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>footer</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-bg-gray-900 tw-text-white tw-p-4 tw-mt-auto<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-container tw-mx-auto tw-text-center<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
-      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>©2025 Galactic Archives | Built with Angular by the Rebel Alliance<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>
+        © {{ getCurrentYear() }} Galactic Archives | Built with Angular by the
+        Rebel Alliance
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>footer</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span></code></pre>
@@ -280,6 +284,7 @@ ng serve <span class="token parameter variable">--open</span></code></pre>
       <p>
         <a href="/musings/post-0-introduction/">← Previous</a>
         
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
         
  |         <a href="/musings/post-2-code-quality-setup/">Next →</a>
       </p>

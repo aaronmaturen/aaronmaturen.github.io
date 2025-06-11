@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/css/tufte.min.css" />
     <link rel="stylesheet" href="/assets/css/prism-theme.css" />
     <link rel="stylesheet" href="/assets/css/custom.css" />
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="Aaron T. Maturen's Musings" />
   </head>
   <body>
     <article>
@@ -129,7 +130,7 @@
     <span class="token attr-name">*matCellDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character<span class="token punctuation">"</span></span>
     <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-yellow-400 tw-font-medium<span class="token punctuation">"</span></span>
   <span class="token punctuation">></span></span>
-    
+    {{ character.name }}
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-container</span><span class="token punctuation">></span></span></code></pre>
 <p>Notice the addition of <code>mat-sort-header</code> to the <code>th</code> element. This transforms our plain header into a clickable sorting control. Let's do the same for our other columns:</p>
@@ -146,7 +147,7 @@
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>span</span><span class="token punctuation">></span></span>GENDER<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>span</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>th</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>td</span> <span class="token attr-name">mat-cell</span> <span class="token attr-name">*matCellDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>td</span> <span class="token attr-name">mat-cell</span> <span class="token attr-name">*matCellDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ character.gender }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-container</span><span class="token punctuation">></span></span>
 
 <span class="token comment">&lt;!-- Birth Year Column --></span>
@@ -162,7 +163,7 @@
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>span</span><span class="token punctuation">></span></span>BIRTH YEAR<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>span</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>th</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>td</span> <span class="token attr-name">mat-cell</span> <span class="token attr-name">*matCellDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>td</span> <span class="token attr-name">mat-cell</span> <span class="token attr-name">*matCellDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ character.birth_year }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-container</span><span class="token punctuation">></span></span>
 
 <span class="token comment">&lt;!-- Height Column --></span>
@@ -180,7 +181,7 @@
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>span</span><span class="token punctuation">></span></span>HEIGHT<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>span</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>th</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>td</span> <span class="token attr-name">mat-cell</span> <span class="token attr-name">*matCellDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>cm<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>td</span> <span class="token attr-name">mat-cell</span> <span class="token attr-name">*matCellDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ character.height }}cm<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-container</span><span class="token punctuation">></span></span></code></pre>
 <blockquote>
 <p>A member of the Council of Patterns once remarked, &quot;The beauty of declarative templates is that they hide the complexity of event binding and state management behind simple directives.&quot; Another council member replied, &quot;Yes, until you need to debug them.&quot; The room fell silent as the Cosmic Compiler nodded in solemn agreement.</p>
@@ -616,6 +617,7 @@ test<span class="token punctuation">.</span><span class="token function">describ
       <p>
         <a href="/musings/post-8-implementing-pagination/">← Previous</a>
         
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
         
  |         <a href="/musings/post-10-implementing-filtering/">Next →</a>
       </p>

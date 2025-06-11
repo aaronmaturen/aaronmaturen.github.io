@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/css/tufte.min.css" />
     <link rel="stylesheet" href="/assets/css/prism-theme.css" />
     <link rel="stylesheet" href="/assets/css/custom.css" />
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="Aaron T. Maturen's Musings" />
   </head>
   <body>
     <article>
@@ -116,7 +117,7 @@ Now let's look at the template where most of the magic happens:
         data-testid=&quot;error-message&quot;
         class=&quot;tw-bg-red-100 tw-border-l-4 tw-border-red-500 tw-text-red-700 tw-p-4 tw-mb-4&quot;
       &gt;
-        
+        {{ error }}
       &lt;/div&gt;
 </code></pre>
 <p>We start with a container for our component, a title, and handling for loading and error states. Notice we're using Tailwind CSS classes with the <code>tw-</code> prefix as per our project standards.</p>
@@ -139,7 +140,7 @@ Now let's look at the template where most of the magic happens:
               <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-black tw-font-medium"</span>
               data<span class="token operator">-</span>testid<span class="token operator">=</span><span class="token string">"character-name"</span>
             <span class="token operator">></span>
-              
+              <span class="token punctuation">{</span><span class="token punctuation">{</span> character<span class="token punctuation">.</span>name <span class="token punctuation">}</span><span class="token punctuation">}</span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
           <span class="token operator">&lt;</span><span class="token operator">/</span>ng<span class="token operator">-</span>container<span class="token operator">></span></code></pre>
 <p>Here we begin our table implementation using <code>mat-table</code> and binding it to our DataSource. For each column, we define a <code>matColumnDef</code> with a unique name that matches the property in our <code>displayedColumns</code> array. Each column has both a header cell (<code>th</code>) and a data cell (<code>td</code>) template.</p>
@@ -152,7 +153,7 @@ Now let's look at the template where most of the magic happens:
                 <span class="token operator">&lt;</span>span<span class="token operator">></span><span class="token constant">GENDER</span><span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>th<span class="token operator">></span>
-            <span class="token operator">&lt;</span>td mat<span class="token operator">-</span>cell <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span><span class="token operator">></span><span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
+            <span class="token operator">&lt;</span>td mat<span class="token operator">-</span>cell <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span><span class="token operator">></span><span class="token punctuation">{</span><span class="token punctuation">{</span> character<span class="token punctuation">.</span>gender <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
           <span class="token operator">&lt;</span><span class="token operator">/</span>ng<span class="token operator">-</span>container<span class="token operator">></span>
 
           <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Birth Year Column <span class="token operator">--</span><span class="token operator">></span>
@@ -163,7 +164,7 @@ Now let's look at the template where most of the magic happens:
                 <span class="token operator">&lt;</span>span<span class="token operator">></span><span class="token constant">BIRTH</span> <span class="token constant">YEAR</span><span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>th<span class="token operator">></span>
-            <span class="token operator">&lt;</span>td mat<span class="token operator">-</span>cell <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span><span class="token operator">></span><span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
+            <span class="token operator">&lt;</span>td mat<span class="token operator">-</span>cell <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span><span class="token operator">></span><span class="token punctuation">{</span><span class="token punctuation">{</span> character<span class="token punctuation">.</span>birth_year <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
           <span class="token operator">&lt;</span><span class="token operator">/</span>ng<span class="token operator">-</span>container<span class="token operator">></span>
 
           <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Height Column <span class="token operator">--</span><span class="token operator">></span>
@@ -174,7 +175,7 @@ Now let's look at the template where most of the magic happens:
                 <span class="token operator">&lt;</span>span<span class="token operator">></span><span class="token constant">HEIGHT</span><span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>th<span class="token operator">></span>
-            <span class="token operator">&lt;</span>td mat<span class="token operator">-</span>cell <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span><span class="token operator">></span>cm<span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
+            <span class="token operator">&lt;</span>td mat<span class="token operator">-</span>cell <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span><span class="token operator">></span><span class="token punctuation">{</span><span class="token punctuation">{</span> character<span class="token punctuation">.</span>height <span class="token punctuation">}</span><span class="token punctuation">}</span>cm<span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
           <span class="token operator">&lt;</span><span class="token operator">/</span>ng<span class="token operator">-</span>container<span class="token operator">></span></code></pre>
 <p>We follow the same pattern for each column, using appropriate icons that match the data being displayed. Notice how we're using the Star Wars yellow color theme with <code>tw-text-yellow-400</code> for headers.</p>
 <p>Now we need to define how rows should be rendered:</p>
@@ -691,6 +692,7 @@ Now let's look at the template where most of the magic happens:
       <p>
         <a href="/musings/post-7-datasource-foundation/">← Previous</a>
         
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
         
  |         <a href="/musings/post-9-adding-sorting/">Next →</a>
       </p>

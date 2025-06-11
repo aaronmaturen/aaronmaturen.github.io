@@ -87,13 +87,11 @@ section > footer,
 section > table,
 section > ul,
 section > ol,
-section > dl,
 blockquote p,
 blockquote footer,
 p,
 ul,
-ol,
-dl {
+ol {
   width: 100% !important;
   max-width: 100% !important;
 }
@@ -104,8 +102,7 @@ article {
 }
 
 /* Fix margin notes positioning */
-.marginnote,
-.sidenote {
+.marginnote {
   margin-right: -30% !important;
 }
 

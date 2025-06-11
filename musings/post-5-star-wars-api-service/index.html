@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/css/tufte.min.css" />
     <link rel="stylesheet" href="/assets/css/prism-theme.css" />
     <link rel="stylesheet" href="/assets/css/custom.css" />
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="Aaron T. Maturen's Musings" />
   </head>
   <body>
     <article>
@@ -242,7 +243,7 @@
         *ngIf="error"
         class="tw-bg-red-100 tw-border-l-4 tw-border-red-500 tw-text-red-700 tw-p-4 tw-mb-4"
       >
-        
+        {{ error }}
       &lt;/div>
 
       &lt;div
@@ -253,25 +254,25 @@
           class="tw-mb-4 tw-transition-all tw-duration-300 tw-hover:tw-shadow-xl"
         >
           &lt;mat-card-header>
-            &lt;mat-card-title>&lt;/mat-card-title>
+            &lt;mat-card-title>{{ character.name }}&lt;/mat-card-title>
             &lt;mat-card-subtitle
-              >Birth Year: &lt;/mat-card-subtitle
+              >Birth Year: {{ character.birth_year }}&lt;/mat-card-subtitle
             >
           &lt;/mat-card-header>
 
           &lt;mat-card-content class="tw-py-2">
             &lt;div class="tw-grid tw-grid-cols-2 tw-gap-2">
               &lt;div class="tw-text-sm">
-                &lt;strong>Height:&lt;/strong> cm
+                &lt;strong>Height:&lt;/strong> {{ character.height }}cm
               &lt;/div>
               &lt;div class="tw-text-sm">
-                &lt;strong>Mass:&lt;/strong> kg
+                &lt;strong>Mass:&lt;/strong> {{ character.mass }}kg
               &lt;/div>
               &lt;div class="tw-text-sm">
-                &lt;strong>Hair:&lt;/strong> 
+                &lt;strong>Hair:&lt;/strong> {{ character.hair_color }}
               &lt;/div>
               &lt;div class="tw-text-sm">
-                &lt;strong>Eyes:&lt;/strong> 
+                &lt;strong>Eyes:&lt;/strong> {{ character.eye_color }}
               &lt;/div>
             &lt;/div>
           &lt;/mat-card-content>
@@ -446,6 +447,7 @@ ng serve</code></pre>
       <p>
         <a href="/musings/post-4-feature-based-architecture/">← Previous</a>
         
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
         
  |         <a href="/musings/post-6-api-mocking-msw/">Next →</a>
       </p>

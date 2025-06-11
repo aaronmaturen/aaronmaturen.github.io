@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/css/tufte.min.css" />
     <link rel="stylesheet" href="/assets/css/prism-theme.css" />
     <link rel="stylesheet" href="/assets/css/custom.css" />
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="Aaron T. Maturen's Musings" />
   </head>
   <body>
     <article>
@@ -474,7 +475,7 @@ main.js               | main          | 850.72 kB |               188.43 kB
           mat-dialog-title
           class="tw-text-rebel-yellow tw-text-xl tw-tracking-wider tw-m-0"
         >
-          
+          {{ data.character.name | uppercase }}
         &lt;/h2>
         &lt;button mat-icon-button mat-dialog-close>
           &lt;mat-icon class="tw-text-rebel-yellow/70">close&lt;/mat-icon>
@@ -485,31 +486,39 @@ main.js               | main          | 850.72 kB |               188.43 kB
         &lt;div class="tw-grid tw-grid-cols-2 tw-gap-4">
           &lt;div class="tw-flex tw-flex-col">
             &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">GENDER&lt;/span>
-            &lt;span class="tw-text-white">&lt;/span>
+            &lt;span class="tw-text-white">{{
+              data.character.gender | titlecase
+            }}&lt;/span>
           &lt;/div>
           &lt;div class="tw-flex tw-flex-col">
             &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">BIRTH YEAR&lt;/span>
-            &lt;span class="tw-text-white">&lt;/span>
+            &lt;span class="tw-text-white">{{ data.character.birth_year }}&lt;/span>
           &lt;/div>
           &lt;div class="tw-flex tw-flex-col">
             &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">HEIGHT&lt;/span>
-            &lt;span class="tw-text-white">cm&lt;/span>
+            &lt;span class="tw-text-white">{{ data.character.height }}cm&lt;/span>
           &lt;/div>
           &lt;div class="tw-flex tw-flex-col">
             &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">MASS&lt;/span>
-            &lt;span class="tw-text-white">kg&lt;/span>
+            &lt;span class="tw-text-white">{{ data.character.mass }}kg&lt;/span>
           &lt;/div>
           &lt;div class="tw-flex tw-flex-col">
             &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">EYE COLOR&lt;/span>
-            &lt;span class="tw-text-white">&lt;/span>
+            &lt;span class="tw-text-white">{{
+              data.character.eye_color | titlecase
+            }}&lt;/span>
           &lt;/div>
           &lt;div class="tw-flex tw-flex-col">
             &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">HAIR COLOR&lt;/span>
-            &lt;span class="tw-text-white">&lt;/span>
+            &lt;span class="tw-text-white">{{
+              data.character.hair_color | titlecase
+            }}&lt;/span>
           &lt;/div>
           &lt;div class="tw-flex tw-flex-col">
             &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">SKIN COLOR&lt;/span>
-            &lt;span class="tw-text-white">&lt;/span>
+            &lt;span class="tw-text-white">{{
+              data.character.skin_color | titlecase
+            }}&lt;/span>
           &lt;/div>
         &lt;/div>
 
@@ -524,10 +533,10 @@ main.js               | main          | 850.72 kB |               188.43 kB
           &lt;/div>
           &lt;p class="tw-text-white/70 tw-text-sm tw-m-0">
             This individual has appeared in
-             documented incidents.
+            {{ data.character.films?.length || 0 }} documented incidents.
             &lt;span *ngIf="data.character.starships?.length">
               Known to operate
-               starship(s).
+              {{ data.character.starships.length }} starship(s).
             &lt;/span>
           &lt;/p>
         &lt;/div>
@@ -681,6 +690,7 @@ main.js               | main          | 850.72 kB |               188.43 kB
       <p>
         <a href="/musings/post-10-implementing-filtering/">← Previous</a>
         
+ |         <a href="/musings/galactic-archives-series/">Series Overview</a>
         
  |         <a href="/musings/post-12-cicd-github-actions/">Next →</a>
       </p>
