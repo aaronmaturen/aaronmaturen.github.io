@@ -543,7 +543,7 @@ And create a styled dialog component:
           mat-dialog-title
           class="tw-text-rebel-yellow tw-text-xl tw-tracking-wider tw-m-0"
         >
-          {{ data.character.name | uppercase }}
+          {{ data.character.name }}
         </h2>
         <button mat-icon-button mat-dialog-close>
           <mat-icon class="tw-text-rebel-yellow/70">close</mat-icon>
@@ -554,9 +554,7 @@ And create a styled dialog component:
         <div class="tw-grid tw-grid-cols-2 tw-gap-4">
           <div class="tw-flex tw-flex-col">
             <span class="tw-text-rebel-yellow/50 tw-text-sm">GENDER</span>
-            <span class="tw-text-white">{{
-              data.character.gender | titlecase
-            }}</span>
+            <span class="tw-text-white">{{ data.character.gender }}</span>
           </div>
           <div class="tw-flex tw-flex-col">
             <span class="tw-text-rebel-yellow/50 tw-text-sm">BIRTH YEAR</span>
@@ -572,21 +570,15 @@ And create a styled dialog component:
           </div>
           <div class="tw-flex tw-flex-col">
             <span class="tw-text-rebel-yellow/50 tw-text-sm">EYE COLOR</span>
-            <span class="tw-text-white">{{
-              data.character.eye_color | titlecase
-            }}</span>
+            <span class="tw-text-white">{{ data.character.eye_color }}</span>
           </div>
           <div class="tw-flex tw-flex-col">
             <span class="tw-text-rebel-yellow/50 tw-text-sm">HAIR COLOR</span>
-            <span class="tw-text-white">{{
-              data.character.hair_color | titlecase
-            }}</span>
+            <span class="tw-text-white">{{ data.character.hair_color }}</span>
           </div>
           <div class="tw-flex tw-flex-col">
             <span class="tw-text-rebel-yellow/50 tw-text-sm">SKIN COLOR</span>
-            <span class="tw-text-white">{{
-              data.character.skin_color | titlecase
-            }}</span>
+            <span class="tw-text-white">{{ data.character.skin_color }}</span>
           </div>
         </div>
 
@@ -601,7 +593,7 @@ And create a styled dialog component:
           </div>
           <p class="tw-text-white/70 tw-text-sm tw-m-0">
             This individual has appeared in
-            {{ data.character.films?.length || 0 }} documented incidents.
+            {{ data.character.films?.length }} documented incidents.
             <span *ngIf="data.character.starships?.length">
               Known to operate
               {{ data.character.starships.length }} starship(s).
