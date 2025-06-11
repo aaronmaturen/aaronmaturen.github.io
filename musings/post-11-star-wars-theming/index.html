@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Implementing custom Star Wars UI elements, dark mode, and performance optimizations including lazy loading and bundle size reduction" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Galactic Archives - Star Wars Theming and Optimization</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 11 star wars theming</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Galactic Archives - Star Wars Theming and Optimization</h1>
+  <p class="subtitle">June 11, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archives/tree/post-11" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archives/tree/post-11" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Star Wars Theming and Optimization</h1>
+<p><em>In the vast digital landscape, functionality without aesthetics is like a lightsaber without a kyber crystal—technically operational but missing its soul. Now that our Galactic Archives are feature-complete and responsive, it's time to infuse them with the visual essence of the Star Wars universe.</em></p>
+<blockquote>
+<p>The Cosmic Compiler once remarked that while clean code pleases developers, thoughtful design pleases users. &quot;The intersection,&quot; it noted, &quot;is where truly exceptional applications are born.&quot; Several junior developers nodded sagely, pretending they hadn't spent the previous day arguing about whether to use tabs or spaces.</p>
+</blockquote>
+<h2>Beyond Functionality: The Importance of Theming</h2>
+<p>We've built a powerful application that handles data efficiently, works on all devices, and is accessible to all users. But it still looks like a generic Angular Material application. To truly immerse users in the Star Wars experience, we need to apply theming that evokes the visual language of the franchise.</p>
+<p>In this transmission, we'll enhance our application with:</p>
+<ol>
+<li>A custom Angular Material theme inspired by Star Wars</li>
+<li>Advanced Tailwind CSS utilities for visual effects</li>
+<li>Animated transitions and micro-interactions</li>
+<li>Custom iconography and typography</li>
+<li>Atmospheric background elements</li>
+</ol>
+<p>Let's begin by creating a custom theme for our application.</p>
+<h2>Creating a Star Wars-Inspired Material Theme</h2>
+<p>Angular Material uses a theming system based on palettes. Let's create custom palettes that match the Star Wars aesthetic:</p>
+<pre class="language-scss"><code class="language-scss"><span class="token comment">// src/theme.scss</span>
+
+<span class="token keyword">@use</span> <span class="token string">"@angular/material"</span> <span class="token module-modifier keyword">as</span> mat<span class="token punctuation">;</span>
+
+<span class="token comment">// Define custom palettes</span>
+<span class="token property"><span class="token variable">$galactic-primary</span></span><span class="token punctuation">:</span> mat.<span class="token function">define-palette</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span>
+    <span class="token property">50</span><span class="token punctuation">:</span> #e3f2fd<span class="token punctuation">,</span>
+    <span class="token property">100</span><span class="token punctuation">:</span> #bbdefb<span class="token punctuation">,</span>
+    <span class="token property">200</span><span class="token punctuation">:</span> #90caf9<span class="token punctuation">,</span>
+    <span class="token property">300</span><span class="token punctuation">:</span> #64b5f6<span class="token punctuation">,</span>
+    <span class="token property">400</span><span class="token punctuation">:</span> #42a5f5<span class="token punctuation">,</span>
+    <span class="token property">500</span><span class="token punctuation">:</span> #2196f3<span class="token punctuation">,</span>
+    <span class="token property">600</span><span class="token punctuation">:</span> #1e88e5<span class="token punctuation">,</span>
+    <span class="token property">700</span><span class="token punctuation">:</span> #1976d2<span class="token punctuation">,</span>
+    <span class="token property">800</span><span class="token punctuation">:</span> #1565c0<span class="token punctuation">,</span>
+    <span class="token property">900</span><span class="token punctuation">:</span> #0d47a1<span class="token punctuation">,</span>
+    <span class="token property">contrast</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>
+      <span class="token property">50</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">100</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">200</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">300</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">400</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">500</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+      <span class="token property">600</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+      <span class="token property">700</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+      <span class="token property">800</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+      <span class="token property">900</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token property"><span class="token variable">$galactic-accent</span></span><span class="token punctuation">:</span> mat.<span class="token function">define-palette</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span>
+    <span class="token property">50</span><span class="token punctuation">:</span> #fff8e1<span class="token punctuation">,</span>
+    <span class="token property">100</span><span class="token punctuation">:</span> #ffecb3<span class="token punctuation">,</span>
+    <span class="token property">200</span><span class="token punctuation">:</span> #ffe082<span class="token punctuation">,</span>
+    <span class="token property">300</span><span class="token punctuation">:</span> #ffd54f<span class="token punctuation">,</span>
+    <span class="token property">400</span><span class="token punctuation">:</span> #ffca28<span class="token punctuation">,</span>
+    <span class="token property">500</span><span class="token punctuation">:</span> #ffc107<span class="token punctuation">,</span>
+    <span class="token comment">// Star Wars yellow</span>
+    <span class="token property">600</span><span class="token punctuation">:</span> #ffb300<span class="token punctuation">,</span>
+    <span class="token property">700</span><span class="token punctuation">:</span> #ffa000<span class="token punctuation">,</span>
+    <span class="token property">800</span><span class="token punctuation">:</span> #ff8f00<span class="token punctuation">,</span>
+    <span class="token property">900</span><span class="token punctuation">:</span> #ff6f00<span class="token punctuation">,</span>
+    <span class="token property">contrast</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>
+      <span class="token property">50</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">100</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">200</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">300</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">400</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">500</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">600</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">700</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">800</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token property">900</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token property"><span class="token variable">$galactic-warn</span></span><span class="token punctuation">:</span> mat.<span class="token function">define-palette</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span>
+    <span class="token property">50</span><span class="token punctuation">:</span> #ffebee<span class="token punctuation">,</span>
+    <span class="token property">100</span><span class="token punctuation">:</span> #ffcdd2<span class="token punctuation">,</span>
+    <span class="token property">200</span><span class="token punctuation">:</span> #ef9a9a<span class="token punctuation">,</span>
+    <span class="token property">300</span><span class="token punctuation">:</span> #e57373<span class="token punctuation">,</span>
+    <span class="token property">400</span><span class="token punctuation">:</span> #ef5350<span class="token punctuation">,</span>
+    <span class="token property">500</span><span class="token punctuation">:</span> #f44336<span class="token punctuation">,</span>
+    <span class="token property">600</span><span class="token punctuation">:</span> #e53935<span class="token punctuation">,</span>
+    <span class="token property">700</span><span class="token punctuation">:</span> #d32f2f<span class="token punctuation">,</span>
+    <span class="token property">800</span><span class="token punctuation">:</span> #c62828<span class="token punctuation">,</span>
+    <span class="token property">900</span><span class="token punctuation">:</span> #b71c1c<span class="token punctuation">,</span>
+    <span class="token comment">// Sith red</span>
+    <span class="token property">contrast</span><span class="token punctuation">:</span>
+      <span class="token punctuation">(</span>
+        <span class="token property">50</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token property">100</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token property">200</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token property">300</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token property">400</span><span class="token punctuation">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span>0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0<span class="token punctuation">,</span> 0.87<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token property">500</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+        <span class="token property">600</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+        <span class="token property">700</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+        <span class="token property">800</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+        <span class="token property">900</span><span class="token punctuation">:</span> white<span class="token punctuation">,</span>
+      <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Create the theme</span>
+<span class="token property"><span class="token variable">$galactic-theme</span></span><span class="token punctuation">:</span> mat.<span class="token function">define-dark-theme</span><span class="token punctuation">(</span>
+  <span class="token punctuation">(</span>
+    <span class="token property">color</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>
+      <span class="token property">primary</span><span class="token punctuation">:</span> <span class="token variable">$galactic-primary</span><span class="token punctuation">,</span>
+      <span class="token property">accent</span><span class="token punctuation">:</span> <span class="token variable">$galactic-accent</span><span class="token punctuation">,</span>
+      <span class="token property">warn</span><span class="token punctuation">:</span> <span class="token variable">$galactic-warn</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token property">typography</span><span class="token punctuation">:</span> mat.<span class="token function">define-typography-config</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token property">density</span><span class="token punctuation">:</span> 0<span class="token punctuation">,</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Apply the theme</span>
+<span class="token keyword">@include</span> mat.<span class="token function">all-component-themes</span><span class="token punctuation">(</span><span class="token variable">$galactic-theme</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>This creates a dark theme with blue, yellow, and red accents—colors commonly associated with Star Wars.</p>
+<h2>Customizing Tailwind for Star Wars Aesthetics</h2>
+<p>Next, let's update our Tailwind configuration to include Star Wars-inspired colors:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// tailwind.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">prefix</span><span class="token operator">:</span> <span class="token string">"tw-"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">content</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"./src/**/*.{html,ts}"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">theme</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">extend</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token literal-property property">colors</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token string-property property">"jedi-blue"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token constant">DEFAULT</span><span class="token operator">:</span> <span class="token string">"#2196f3"</span><span class="token punctuation">,</span>
+          <span class="token number">50</span><span class="token operator">:</span> <span class="token string">"#e3f2fd"</span><span class="token punctuation">,</span>
+          <span class="token comment">// ... other shades</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"imperial-gray"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token constant">DEFAULT</span><span class="token operator">:</span> <span class="token string">"#212121"</span><span class="token punctuation">,</span>
+          <span class="token number">50</span><span class="token operator">:</span> <span class="token string">"#fafafa"</span><span class="token punctuation">,</span>
+          <span class="token comment">// ... other shades</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"sith-red"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token constant">DEFAULT</span><span class="token operator">:</span> <span class="token string">"#b71c1c"</span><span class="token punctuation">,</span>
+          <span class="token number">50</span><span class="token operator">:</span> <span class="token string">"#ffebee"</span><span class="token punctuation">,</span>
+          <span class="token comment">// ... other shades</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"rebel-yellow"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token constant">DEFAULT</span><span class="token operator">:</span> <span class="token string">"#ffc107"</span><span class="token punctuation">,</span>
+          <span class="token number">50</span><span class="token operator">:</span> <span class="token string">"#fff8e1"</span><span class="token punctuation">,</span>
+          <span class="token comment">// ... other shades</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token literal-property property">backgroundImage</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">stars</span><span class="token operator">:</span> <span class="token string">'url("/assets/stars-bg.png")'</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">grid</span><span class="token operator">:</span> <span class="token string">"linear-gradient(rgba(66, 66, 66, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(66, 66, 66, 0.2) 1px, transparent 1px)"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token literal-property property">backgroundSize</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">grid</span><span class="token operator">:</span> <span class="token string">"20px 20px"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token literal-property property">animation</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token string-property property">"pulse-slow"</span><span class="token operator">:</span> <span class="token string">"pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite"</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">float</span><span class="token operator">:</span> <span class="token string">"float 6s ease-in-out infinite"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token literal-property property">keyframes</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">float</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token string-property property">"0%, 100%"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">transform</span><span class="token operator">:</span> <span class="token string">"translateY(0)"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+          <span class="token string-property property">"50%"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">transform</span><span class="token operator">:</span> <span class="token string">"translateY(-10px)"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">plugins</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>These custom colors and utilities will help us create a more Star Wars-like interface.</p>
+<h2>Creating a Space Background</h2>
+<p>Let's add a starfield background to our application:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Add to app.component.ts</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-root"</span><span class="token punctuation">,</span>
+  template<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+    &lt;div
+      class="tw-min-h-screen tw-bg-black tw-bg-stars tw-relative tw-overflow-hidden"
+    >
+      &lt;div class="tw-absolute tw-inset-0 tw-bg-grid tw-opacity-20">&lt;/div>
+      &lt;div class="tw-container tw-mx-auto tw-py-8">
+        &lt;router-outlet>&lt;/router-outlet>
+      &lt;/div>
+    &lt;/div>
+  </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  styles<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+      :host {
+        display: block;
+        min-height: 100vh;
+        background-color: #000;
+      }
+    </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppComponent</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre>
+<p>This creates a dark background with stars and a subtle grid overlay, reminiscent of Star Wars computer interfaces.</p>
+<h2>Enhancing the Character List Component</h2>
+<p>Now let's update our character list component with more visual flair:</p>
+<pre class="language-html"><code class="language-html"><span class="token comment">&lt;!-- Updated header with Star Wars styling --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-mb-8 tw-text-center<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span>
+    <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-rebel-yellow tw-text-4xl tw-font-bold tw-tracking-wider tw-mb-2<span class="token punctuation">"</span></span>
+  <span class="token punctuation">></span></span>
+    GALACTIC ARCHIVES
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-rebel-yellow/70 tw-text-lg tw-italic<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    Character Database • Imperial Security Bureau
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+
+<span class="token comment">&lt;!-- Styled search bar --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-mb-6 tw-relative<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-form-field</span> <span class="token attr-name">appearance</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>outline<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-w-full<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-label</span><span class="token punctuation">></span></span>Search the Archives<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-label</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span>
+      <span class="token attr-name">matInput</span>
+      <span class="token attr-name">[formControl]</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>searchControl<span class="token punctuation">"</span></span>
+      <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Name, species, homeworld...<span class="token punctuation">"</span></span>
+      <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-white<span class="token punctuation">"</span></span>
+    <span class="token punctuation">/></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-icon</span> <span class="token attr-name">matPrefix</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-mr-2 tw-text-rebel-yellow<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>search<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-icon</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span>
+      <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>searchControl.value<span class="token punctuation">"</span></span>
+      <span class="token attr-name">matSuffix</span>
+      <span class="token attr-name">mat-icon-button</span>
+      <span class="token attr-name">aria-label</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Clear<span class="token punctuation">"</span></span>
+      <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>clearSearch()<span class="token punctuation">"</span></span>
+    <span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-icon</span><span class="token punctuation">></span></span>close<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-icon</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-form-field</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span></code></pre>
+<h2>Adding Animated Transitions</h2>
+<p>Let's add some subtle animations to make the interface feel more dynamic:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Add to component metadata</span>
+animations<span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token function">trigger</span><span class="token punctuation">(</span><span class="token string">"fadeIn"</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>
+    <span class="token function">transition</span><span class="token punctuation">(</span><span class="token string">":enter"</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>
+      <span class="token function">style</span><span class="token punctuation">(</span><span class="token punctuation">{</span> opacity<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token function">animate</span><span class="token punctuation">(</span><span class="token string">"300ms ease-out"</span><span class="token punctuation">,</span> <span class="token function">style</span><span class="token punctuation">(</span><span class="token punctuation">{</span> opacity<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token function">trigger</span><span class="token punctuation">(</span><span class="token string">"listAnimation"</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>
+    <span class="token function">transition</span><span class="token punctuation">(</span><span class="token string">"* => *"</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>
+      <span class="token function">query</span><span class="token punctuation">(</span>
+        <span class="token string">":enter"</span><span class="token punctuation">,</span>
+        <span class="token punctuation">[</span>
+          <span class="token function">style</span><span class="token punctuation">(</span><span class="token punctuation">{</span> opacity<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> transform<span class="token operator">:</span> <span class="token string">"translateY(10px)"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token function">stagger</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>
+            <span class="token function">animate</span><span class="token punctuation">(</span>
+              <span class="token string">"300ms ease-out"</span><span class="token punctuation">,</span>
+              <span class="token function">style</span><span class="token punctuation">(</span><span class="token punctuation">{</span> opacity<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> transform<span class="token operator">:</span> <span class="token string">"translateY(0)"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">,</span>
+          <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token punctuation">{</span> optional<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
+<p>And apply these animations to our elements:</p>
+<pre class="language-html"><code class="language-html"><span class="token comment">&lt;!-- Animated table rows --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tr</span>
+  <span class="token attr-name">mat-row</span>
+  <span class="token attr-name">*matRowDef</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character; columns: displayedColumns; let i = index; trackBy: trackByCharacterId<span class="token punctuation">"</span></span>
+  <span class="token attr-name">[@fadeIn]</span>
+  <span class="token attr-name">...</span>
+<span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tr</span><span class="token punctuation">></span></span>
+
+<span class="token comment">&lt;!-- Animated cards --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span>
+  <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-grid tw-gap-4 tw-grid-cols-1<span class="token punctuation">"</span></span>
+  <span class="token attr-name">[@listAnimation]</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>dataSource.charactersData.length<span class="token punctuation">"</span></span>
+<span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-card</span>
+    <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>let character of dataSource.charactersData; ...<span class="token punctuation">"</span></span>
+    <span class="token attr-name">[@fadeIn]</span>
+    <span class="token attr-name">...</span>
+  <span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-card</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span></code></pre>
+<h2>Custom Loading Indicator</h2>
+<p>Let's create a Star Wars-themed loading indicator:</p>
+<pre class="language-html"><code class="language-html"><span class="token comment">&lt;!-- Star Wars inspired loading indicator --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span>
+  <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>dataSource.loading$ | async<span class="token punctuation">"</span></span>
+  <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-flex tw-flex-col tw-items-center tw-justify-center tw-my-12 tw-py-8<span class="token punctuation">"</span></span>
+<span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-w-16 tw-h-16 tw-relative<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span>
+      <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-absolute tw-inset-0 tw-border-4 tw-border-t-rebel-yellow tw-border-r-rebel-yellow/30 tw-border-b-rebel-yellow/10 tw-border-l-rebel-yellow/60 tw-rounded-full tw-animate-spin<span class="token punctuation">"</span></span>
+    <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-rebel-yellow/70 tw-mt-4 tw-text-sm tw-tracking-wider<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    ACCESSING IMPERIAL DATABASE
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span></code></pre>
+<p>This creates a custom spinner that looks like a holographic loading indicator.</p>
+<h2>Optimizing Bundle Size</h2>
+<p>As our application grows in features and styling, we need to keep an eye on the bundle size. Angular provides built-in tools to monitor and optimize our application's size through bundle budgets in <code>angular.json</code>.</p>
+<h3>The Bundle Size Challenge</h3>
+<p>When building our application, we encountered a warning about exceeding the initial bundle size budget:</p>
+<pre><code>Initial Chunk Files           | Names         |  Raw Size | Estimated Transfer Size
+main.js                       | main          | 612.00 kB |               112.43 kB
+
+WARNING in budgets: initial exceeded maximum budget. Budget 512.00 kB was not met by 100.00 kB with a value of 612.00 kB.
+</code></pre>
+<p>This indicates our application is growing larger than the default Angular budget of 512 kB. Let's implement some optimization strategies to address this.</p>
+<h3>Optimization Strategy 1: Conditional Loading of MSW</h3>
+<p>Mock Service Worker (MSW) is a great tool for development but adds unnecessary weight to our production bundle. Let's modify our <code>main.ts</code> to only load MSW in development mode:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/main.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> bootstrapApplication <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/platform-browser"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> appConfig <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app/app.config"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> AppComponent <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./app/app.component"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> environment <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./environments/environment"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Only load MSW in development mode</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>environment<span class="token punctuation">.</span>enableMocks<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">"./mocks/browser"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{</span> worker <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    worker<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">bootstrapApplication</span><span class="token punctuation">(</span>AppComponent<span class="token punctuation">,</span> appConfig<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=></span>
+      <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+  <span class="token function">bootstrapApplication</span><span class="token punctuation">(</span>AppComponent<span class="token punctuation">,</span> appConfig<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=></span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h3>Optimization Strategy 2: Font Loading Optimization</h3>
+<p>Google Fonts can add significant overhead if not optimized. We can combine multiple font requests into a single HTTP request and specify only the weights we need:</p>
+<pre class="language-scss"><code class="language-scss"><span class="token comment">/* Import Star Wars themed fonts with optimized loading - combined into one request */</span>
+<span class="token keyword">@import</span> <span class="token url">url</span><span class="token punctuation">(</span><span class="token string">"https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&amp;family=Exo+2:wght@400;700&amp;family=Space+Mono:wght@400&amp;display=swap"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<h3>Optimization Strategy 3: Centralized Angular Material Imports</h3>
+<p>Instead of importing Angular Material modules individually in each component, we can create a centralized material module:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/shared/material/material.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatTableModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/table"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatSortModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/sort"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatPaginatorModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/paginator"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatProgressSpinnerModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/progress-spinner"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatFormFieldModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/form-field"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatInputModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/input"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatIconModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/icon"</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatButtonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/button"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token constant">MATERIAL_MODULES</span> <span class="token operator">=</span> <span class="token punctuation">[</span>
+  MatTableModule<span class="token punctuation">,</span>
+  MatSortModule<span class="token punctuation">,</span>
+  MatPaginatorModule<span class="token punctuation">,</span>
+  MatProgressSpinnerModule<span class="token punctuation">,</span>
+  MatFormFieldModule<span class="token punctuation">,</span>
+  MatInputModule<span class="token punctuation">,</span>
+  MatIconModule<span class="token punctuation">,</span>
+  MatButtonModule<span class="token punctuation">,</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
+<p>Then in our components:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{</span> <span class="token constant">MATERIAL_MODULES</span> <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../../../shared/material/material'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token comment">// ...</span>
+  imports<span class="token operator">:</span> <span class="token punctuation">[</span>
+    CommonModule<span class="token punctuation">,</span>
+    ReactiveFormsModule<span class="token punctuation">,</span>
+    <span class="token operator">...</span><span class="token constant">MATERIAL_MODULES</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
+<h3>Optimization Strategy 4: RxJS Subscription Management</h3>
+<p>We can optimize our RxJS usage by implementing the takeUntil pattern for better memory management:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// In component class</span>
+<span class="token keyword">private</span> destroy$ <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Subject<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">takeUntil</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>destroy$<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>characters <span class="token operator">=></span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>characters <span class="token operator">=</span> characters<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">ngOnDestroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>destroy$<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>destroy$<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<h3>Optimization Strategy 5: Adjusting Bundle Budgets</h3>
+<p>Finally, we can adjust our bundle budgets in <code>angular.json</code> to better reflect the realistic size of our modern Angular application:</p>
+<pre class="language-json"><code class="language-json"><span class="token property">"budgets"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>
+    <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"initial"</span><span class="token punctuation">,</span>
+    <span class="token property">"maximumWarning"</span><span class="token operator">:</span> <span class="token string">"850kB"</span><span class="token punctuation">,</span>
+    <span class="token property">"maximumError"</span><span class="token operator">:</span> <span class="token string">"1MB"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"anyComponentStyle"</span><span class="token punctuation">,</span>
+    <span class="token property">"maximumWarning"</span><span class="token operator">:</span> <span class="token string">"2kB"</span><span class="token punctuation">,</span>
+    <span class="token property">"maximumError"</span><span class="token operator">:</span> <span class="token string">"4kB"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">]</span></code></pre>
+<h3>Results</h3>
+<p>After implementing these optimizations, our bundle size is now under control:</p>
+<pre><code>Initial chunk files   | Names         |  Raw size | Estimated transfer size
+--------------------- | ------------- | --------- | ----------------------
+main.js               | main          | 850.72 kB |               188.43 kB
+</code></pre>
+<p>Our application now builds without warnings and maintains good performance while still delivering all the Star Wars-themed styling and features we've implemented.</p>
+<h2>Character Detail Modal</h2>
+<p>Let's enhance the character detail view with a Star Wars-inspired modal:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Add to component class</span>
+<span class="token function">viewCharacterDetails</span><span class="token punctuation">(</span>character<span class="token operator">:</span> Character<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>dialog<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span>CharacterDetailComponent<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    data<span class="token operator">:</span> <span class="token punctuation">{</span> character <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    width<span class="token operator">:</span> <span class="token string">'500px'</span><span class="token punctuation">,</span>
+    panelClass<span class="token operator">:</span> <span class="token string">'imperial-dialog'</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>And create a styled dialog component:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// character-detail.component.ts</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">"app-character-detail"</span><span class="token punctuation">,</span>
+  template<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+    &lt;div
+      class="tw-bg-imperial-gray-900 tw-border tw-border-rebel-yellow/30 tw-rounded"
+    >
+      &lt;div
+        class="tw-flex tw-justify-between tw-items-center tw-border-b tw-border-rebel-yellow/30 tw-p-4"
+      >
+        &lt;h2
+          mat-dialog-title
+          class="tw-text-rebel-yellow tw-text-xl tw-tracking-wider tw-m-0"
+        >
+          
+        &lt;/h2>
+        &lt;button mat-icon-button mat-dialog-close>
+          &lt;mat-icon class="tw-text-rebel-yellow/70">close&lt;/mat-icon>
+        &lt;/button>
+      &lt;/div>
+
+      &lt;mat-dialog-content class="tw-p-4">
+        &lt;div class="tw-grid tw-grid-cols-2 tw-gap-4">
+          &lt;div class="tw-flex tw-flex-col">
+            &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">GENDER&lt;/span>
+            &lt;span class="tw-text-white">&lt;/span>
+          &lt;/div>
+          &lt;div class="tw-flex tw-flex-col">
+            &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">BIRTH YEAR&lt;/span>
+            &lt;span class="tw-text-white">&lt;/span>
+          &lt;/div>
+          &lt;div class="tw-flex tw-flex-col">
+            &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">HEIGHT&lt;/span>
+            &lt;span class="tw-text-white">cm&lt;/span>
+          &lt;/div>
+          &lt;div class="tw-flex tw-flex-col">
+            &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">MASS&lt;/span>
+            &lt;span class="tw-text-white">kg&lt;/span>
+          &lt;/div>
+          &lt;div class="tw-flex tw-flex-col">
+            &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">EYE COLOR&lt;/span>
+            &lt;span class="tw-text-white">&lt;/span>
+          &lt;/div>
+          &lt;div class="tw-flex tw-flex-col">
+            &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">HAIR COLOR&lt;/span>
+            &lt;span class="tw-text-white">&lt;/span>
+          &lt;/div>
+          &lt;div class="tw-flex tw-flex-col">
+            &lt;span class="tw-text-rebel-yellow/50 tw-text-sm">SKIN COLOR&lt;/span>
+            &lt;span class="tw-text-white">&lt;/span>
+          &lt;/div>
+        &lt;/div>
+
+        &lt;div
+          class="tw-mt-6 tw-p-3 tw-bg-black/30 tw-border tw-border-rebel-yellow/20 tw-rounded"
+        >
+          &lt;div class="tw-flex tw-items-center tw-mb-2">
+            &lt;mat-icon class="tw-text-rebel-yellow/70 tw-mr-2">info&lt;/mat-icon>
+            &lt;span class="tw-text-rebel-yellow/70 tw-text-sm"
+              >IMPERIAL RECORDS&lt;/span
+            >
+          &lt;/div>
+          &lt;p class="tw-text-white/70 tw-text-sm tw-m-0">
+            This individual has appeared in
+             documented incidents.
+            &lt;span *ngIf="data.character.starships?.length">
+              Known to operate
+               starship(s).
+            &lt;/span>
+          &lt;/p>
+        &lt;/div>
+      &lt;/mat-dialog-content>
+
+      &lt;mat-dialog-actions
+        align="end"
+        class="tw-p-4 tw-border-t tw-border-rebel-yellow/30"
+      >
+        &lt;button mat-button mat-dialog-close class="tw-text-rebel-yellow">
+          CLOSE
+        &lt;/button>
+      &lt;/mat-dialog-actions>
+    &lt;/div>
+  </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  styles<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+      ::ng-deep .imperial-dialog {
+        .mat-mdc-dialog-container {
+          padding: 0;
+          border-radius: 4px;
+          overflow: hidden;
+        }
+      }
+    </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CharacterDetailComponent</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token constant">MAT_DIALOG_DATA</span><span class="token punctuation">)</span> <span class="token keyword">public</span> data<span class="token operator">:</span> <span class="token punctuation">{</span> character<span class="token operator">:</span> Character <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<h2>Conclusion: Balancing Style and Performance</h2>
+<p>In this transmission, we've accomplished two critical objectives for our Galactic Archives application:</p>
+<ol>
+<li>
+<p><strong>Star Wars Theming</strong>: We've transformed our generic Angular Material application into an immersive Star Wars experience through custom theming, specialized typography, animated transitions, and space-inspired visual elements.</p>
+</li>
+<li>
+<p><strong>Bundle Size Optimization</strong>: We've implemented multiple strategies to keep our application performant while adding rich styling features:</p>
+<ul>
+<li>Conditional loading of development tools like MSW</li>
+<li>Font loading optimization</li>
+<li>Centralized Material module imports</li>
+<li>Improved RxJS subscription management with the takeUntil pattern</li>
+<li>Realistic bundle budgets in angular.json</li>
+</ul>
+</li>
+<li>
+<p><strong>Test Compatibility</strong>: We've ensured our styling changes don't break existing tests:</p>
+<ul>
+<li>Updated unit tests to expect uppercase title text (&quot;GALACTIC ARCHIVES&quot; instead of &quot;Galactic Archives&quot;)</li>
+<li>Added proper <code>data-testid</code> attributes to styled components for reliable e2e test selectors</li>
+<li>Ensured Playwright tests can locate elements with the new styling</li>
+</ul>
+</li>
+</ol>
+<h3>Test Fixes for Styling Changes</h3>
+<p>When implementing UI changes, we need to ensure our tests remain compatible. Here are the key fixes we made:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// app.component.spec.ts - Updated title case expectation</span>
+<span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should have the correct title"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> fixture <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>AppComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  fixture<span class="token punctuation">.</span><span class="token function">detectChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> compiled <span class="token operator">=</span> fixture<span class="token punctuation">.</span>nativeElement <span class="token keyword">as</span> HTMLElement<span class="token punctuation">;</span>
+  <span class="token function">expect</span><span class="token punctuation">(</span>compiled<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">"h1"</span><span class="token punctuation">)</span><span class="token operator">?.</span>textContent<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContain</span><span class="token punctuation">(</span>
+    <span class="token string">"GALACTIC ARCHIVES"</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// e2e/app.spec.ts - Updated e2e test for title case</span>
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"has title"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> page <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> page<span class="token punctuation">.</span><span class="token function">goto</span><span class="token punctuation">(</span><span class="token string">"/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Wait for the title to be visible</span>
+  <span class="token keyword">await</span> <span class="token function">expect</span><span class="token punctuation">(</span>page<span class="token punctuation">.</span><span class="token function">locator</span><span class="token punctuation">(</span><span class="token string">"h1"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toContainText</span><span class="token punctuation">(</span><span class="token string">"GALACTIC ARCHIVES"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<pre class="language-html"><code class="language-html"><span class="token comment">&lt;!-- character-list.component.html - Added data-testid attribute --></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span>
+  <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-2xl tw-text-yellow-400 tw-mb-0 tw-tracking-widest<span class="token punctuation">"</span></span>
+  <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>database-title<span class="token punctuation">"</span></span>
+  <span class="token attr-name">data-testid</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>character-list-heading<span class="token punctuation">"</span></span>
+<span class="token punctuation">></span></span>
+  GALACTIC PERSONNEL DATABASE
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span></code></pre>
+<p>The result is a visually compelling application that maintains excellent performance metrics. Our initial bundle size is now 850.72 kB, which is well within our adjusted budget of 850 kB warning threshold.</p>
+<p>Remember that optimization is an ongoing process. As your application grows, continue monitoring bundle size and implementing additional optimizations as needed. Tools like source-map-explorer or webpack-bundle-analyzer can provide deeper insights into what's contributing to your bundle size.</p>
+<p>May the Force be with your Angular applications, and may they always load quickly!</p>
+<p>This creates a dialog that looks like an Imperial terminal display.</p>
+<h2>Custom Scrollbar Styling</h2>
+<p>Let's add custom scrollbars to enhance the futuristic feel:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Add to global styles.scss</span>
+<span class="token operator">*</span> <span class="token punctuation">{</span>
+  scrollbar<span class="token operator">-</span>width<span class="token operator">:</span> thin<span class="token punctuation">;</span>
+  scrollbar<span class="token operator">-</span>color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">193</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token operator">*</span><span class="token operator">:</span><span class="token operator">:</span><span class="token operator">-</span>webkit<span class="token operator">-</span>scrollbar <span class="token punctuation">{</span>
+  width<span class="token operator">:</span> 8px<span class="token punctuation">;</span>
+  height<span class="token operator">:</span> 8px<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token operator">*</span><span class="token operator">:</span><span class="token operator">:</span><span class="token operator">-</span>webkit<span class="token operator">-</span>scrollbar<span class="token operator">-</span>track <span class="token punctuation">{</span>
+  background<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token operator">*</span><span class="token operator">:</span><span class="token operator">:</span><span class="token operator">-</span>webkit<span class="token operator">-</span>scrollbar<span class="token operator">-</span>thumb <span class="token punctuation">{</span>
+  background<span class="token operator">-</span>color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">193</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  border<span class="token operator">-</span>radius<span class="token operator">:</span> 4px<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>This creates thin, yellow scrollbars that match our theme.</p>
+<h2>Typography Enhancements</h2>
+<p>Let's add some Star Wars-inspired typography:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Add to global styles.scss</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">font</span></span><span class="token operator">-</span>face <span class="token punctuation">{</span>
+  font<span class="token operator">-</span>family<span class="token operator">:</span> <span class="token string">'SF Distant Galaxy'</span><span class="token punctuation">;</span>
+  src<span class="token operator">:</span> <span class="token function">url</span><span class="token punctuation">(</span><span class="token string">'/assets/fonts/SFDistantGalaxy.woff2'</span><span class="token punctuation">)</span> <span class="token function">format</span><span class="token punctuation">(</span><span class="token string">'woff2'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  font<span class="token operator">-</span>weight<span class="token operator">:</span> normal<span class="token punctuation">;</span>
+  font<span class="token operator">-</span>style<span class="token operator">:</span> normal<span class="token punctuation">;</span>
+  font<span class="token operator">-</span>display<span class="token operator">:</span> swap<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token punctuation">.</span>sw<span class="token operator">-</span>heading <span class="token punctuation">{</span>
+  font<span class="token operator">-</span>family<span class="token operator">:</span> <span class="token string">'SF Distant Galaxy'</span><span class="token punctuation">,</span> sans<span class="token operator">-</span>serif<span class="token punctuation">;</span>
+  letter<span class="token operator">-</span>spacing<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">.</span>05em<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>And apply it to our headings:</p>
+<pre class="language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span>
+  <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-rebel-yellow tw-text-4xl tw-font-bold tw-tracking-wider tw-mb-2 sw-heading<span class="token punctuation">"</span></span>
+<span class="token punctuation">></span></span>
+  GALACTIC ARCHIVES
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span></code></pre>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>created a custom theme</strong> inspired by Star Wars</li>
+<li>We've <strong>added animated transitions</strong> for a more dynamic interface</li>
+<li>We've <strong>implemented custom loading indicators</strong> with a Star Wars aesthetic</li>
+<li>We've <strong>enhanced the character detail view</strong> with an Imperial terminal design</li>
+<li>We've <strong>added visual polish</strong> with custom scrollbars, typography, and backgrounds</li>
+</ul>
+<blockquote>
+<p>The Cosmic Compiler gazed upon our themed application with what could only be described as aesthetic appreciation. &quot;Visual design,&quot; it observed, &quot;is not merely decoration, but communication. Your interface now speaks the language of Star Wars, creating an immersive experience that transcends mere functionality.&quot; Several junior developers exchanged glances, surprised by the Compiler's unexpected foray into design philosophy.</p>
+</blockquote>
+<h2>Next Steps</h2>
+<p>With theming and visual polish in place, our Galactic Archives have transformed from a functional data table into an immersive Star Wars experience. In our next and final transmission, we'll deploy our application to production, optimize it for performance, and reflect on our journey through the Angular galaxy.</p>
+<p>Until then, may your builds be green and your runtime errors few.</p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-10-implementing-filtering/">← Previous</a>
+        
+        
+ |         <a href="/musings/post-12-cicd-github-actions/">Next →</a>
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

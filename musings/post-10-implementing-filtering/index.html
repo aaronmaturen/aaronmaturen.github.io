@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Adding powerful filtering capabilities to our Star Wars character table" />
+    <meta name="description" content="Building advanced search filters with dynamic query parameters to filter Star Wars characters by species, homeworld, and other attributes" />
     <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
-    <title>Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Advanced Filtering</title>
+    <title>Galactic Archives - Implementing Filtering</title>
     <link rel="stylesheet" href="/assets/css/tufte.min.css" />
     <link rel="stylesheet" href="/assets/css/prism-theme.css" />
     <link rel="stylesheet" href="/assets/css/custom.css" />
@@ -28,9 +28,13 @@
 </nav>
         
 <header>
-  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Advanced Filtering</h1>
-  <p class="subtitle">June 11, 2025</p>
+  <h1>Galactic Archives - Implementing Filtering</h1>
+  <p class="subtitle">June 10, 2025</p>
   
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archives/tree/post-10" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archives/tree/post-10" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
 </header>
 
 <main>
@@ -58,14 +62,16 @@
       <span class="token attr-name">matInput</span>
       <span class="token attr-name">[formControl]</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>searchControl<span class="token punctuation">"</span></span>
       <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Search by name, gender, etc.<span class="token punctuation">"</span></span>
-      <span class="token attr-name">aria-label</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Search characters<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token attr-name">aria-label</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Search characters<span class="token punctuation">"</span></span>
+    <span class="token punctuation">/></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-icon</span> <span class="token attr-name">matPrefix</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-mr-2 tw-text-yellow-400<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>search<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-icon</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span>
       <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>searchControl.value<span class="token punctuation">"</span></span>
       <span class="token attr-name">matSuffix</span>
       <span class="token attr-name">mat-icon-button</span>
       <span class="token attr-name">aria-label</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Clear<span class="token punctuation">"</span></span>
-      <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>clearSearch()<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>clearSearch()<span class="token punctuation">"</span></span>
+    <span class="token punctuation">></span></span>
       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-icon</span><span class="token punctuation">></span></span>close<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-icon</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-form-field</span><span class="token punctuation">></span></span>
@@ -115,7 +121,7 @@
 imports<span class="token operator">:</span> <span class="token punctuation">[</span>
   <span class="token comment">// ... other imports</span>
   ReactiveFormsModule<span class="token punctuation">,</span>
-<span class="token punctuation">]</span></code></pre>
+<span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
 <h2>Updating the DataSource</h2>
 <p>Now we need to modify our <code>loadCharacters</code> method to include the search term:</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
@@ -162,29 +168,29 @@ imports<span class="token operator">:</span> <span class="token punctuation">[</
     <span class="token function-variable function">next</span><span class="token operator">:</span> <span class="token punctuation">(</span>response<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
       <span class="token keyword">let</span> characters<span class="token operator">:</span> Character<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
       <span class="token keyword">let</span> totalCount <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-      
+
       <span class="token comment">// Handle different response structures for search vs regular queries</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">'result'</span> <span class="token keyword">in</span> response <span class="token operator">&amp;&amp;</span> <span class="token builtin">Array</span><span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>result<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token comment">// Search response structure</span>
         characters <span class="token operator">=</span> response<span class="token punctuation">.</span>result
           <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>item <span class="token operator">=></span> item<span class="token punctuation">.</span>properties<span class="token punctuation">)</span>
           <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>char<span class="token punctuation">)</span><span class="token operator">:</span> char <span class="token keyword">is</span> Character <span class="token operator">=></span> char <span class="token operator">!==</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-          
+
         totalCount <span class="token operator">=</span> characters<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
       <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">'results'</span> <span class="token keyword">in</span> response <span class="token operator">&amp;&amp;</span> <span class="token builtin">Array</span><span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>results<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token comment">// Regular response structure</span>
         characters <span class="token operator">=</span> response<span class="token punctuation">.</span>results
           <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>item <span class="token operator">=></span> item<span class="token punctuation">.</span>properties<span class="token punctuation">)</span>
           <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>char<span class="token punctuation">)</span><span class="token operator">:</span> char <span class="token keyword">is</span> Character <span class="token operator">=></span> char <span class="token operator">!==</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-          
+
         totalCount <span class="token operator">=</span> response<span class="token punctuation">.</span>total_records <span class="token operator">||</span> <span class="token number">0</span><span class="token punctuation">;</span>
       <span class="token punctuation">}</span>
-      
+
       <span class="token comment">// Apply client-side sorting if sort parameters are provided</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>sortField <span class="token operator">&amp;&amp;</span> sortDirection<span class="token punctuation">)</span> <span class="token punctuation">{</span>
         characters <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">sortData</span><span class="token punctuation">(</span>characters<span class="token punctuation">,</span> sortField<span class="token punctuation">,</span> sortDirection<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">}</span>
-      
+
       <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>characters<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>totalCount<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span><span class="token punctuation">,</span>
@@ -239,15 +245,18 @@ imports<span class="token operator">:</span> <span class="token punctuation">[</
 <h2>Testing Our Filtering Implementation</h2>
 <p>To ensure our filtering works correctly, we should add a test:</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/components/character-list/character-list.component.spec.ts</span>
-<span class="token function">it</span><span class="token punctuation">(</span><span class="token string">'should filter data when search input changes'</span><span class="token punctuation">,</span> <span class="token function">fakeAsync</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+<span class="token function">it</span><span class="token punctuation">(</span><span class="token string">"should filter data when search input changes"</span><span class="token punctuation">,</span> <span class="token function">fakeAsync</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
   <span class="token comment">// Arrange</span>
   <span class="token keyword">const</span> fixture <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>CharacterListComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">const</span> component <span class="token operator">=</span> fixture<span class="token punctuation">.</span>componentInstance<span class="token punctuation">;</span>
-  <span class="token keyword">const</span> dataSourceSpy <span class="token operator">=</span> <span class="token function">spyOn</span><span class="token punctuation">(</span>component<span class="token punctuation">.</span>dataSource<span class="token punctuation">,</span> <span class="token string">'loadCharacters'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>and<span class="token punctuation">.</span><span class="token function">callThrough</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> dataSourceSpy <span class="token operator">=</span> <span class="token function">spyOn</span><span class="token punctuation">(</span>
+    component<span class="token punctuation">.</span>dataSource<span class="token punctuation">,</span>
+    <span class="token string">"loadCharacters"</span>
+  <span class="token punctuation">)</span><span class="token punctuation">.</span>and<span class="token punctuation">.</span><span class="token function">callThrough</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   fixture<span class="token punctuation">.</span><span class="token function">detectChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
   <span class="token comment">// Act - simulate search input</span>
-  component<span class="token punctuation">.</span>searchControl<span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span><span class="token string">'Luke'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  component<span class="token punctuation">.</span>searchControl<span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span><span class="token string">"Luke"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token function">tick</span><span class="token punctuation">(</span><span class="token number">300</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Wait for debounce time</span>
   fixture<span class="token punctuation">.</span><span class="token function">detectChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -257,7 +266,7 @@ imports<span class="token operator">:</span> <span class="token punctuation">[</
 
   <span class="token comment">// Check that the last call included the search term</span>
   <span class="token keyword">const</span> lastCall <span class="token operator">=</span> dataSourceSpy<span class="token punctuation">.</span>calls<span class="token punctuation">.</span><span class="token function">mostRecent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token function">expect</span><span class="token punctuation">(</span>lastCall<span class="token punctuation">.</span>args<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">'Luke'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// The 4th argument should be the filter term</span>
+  <span class="token function">expect</span><span class="token punctuation">(</span>lastCall<span class="token punctuation">.</span>args<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">"Luke"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// The 4th argument should be the filter term</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 <p>This test verifies that:</p>
 <ol>
@@ -267,7 +276,10 @@ imports<span class="token operator">:</span> <span class="token punctuation">[</
 </ol>
 <h2>Enhancing the UI for Filtering</h2>
 <p>Let's add some visual feedback to show when filtering is active:</p>
-<pre class="language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-mb-2 tw-flex tw-justify-between tw-items-center<span class="token punctuation">"</span></span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>searchControl.value<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+<pre class="language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span>
+  <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-mb-2 tw-flex tw-justify-between tw-items-center<span class="token punctuation">"</span></span>
+  <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>searchControl.value<span class="token punctuation">"</span></span>
+<span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>span</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-text-yellow-400<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mat-icon</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>tw-align-middle tw-mr-1<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>filter_list<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mat-icon</span><span class="token punctuation">></span></span>
     Filtering results for ""
@@ -299,6 +311,15 @@ imports<span class="token operator">:</span> <span class="token punctuation">[</
   <section>
     <hr>
     
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-9-adding-sorting/">← Previous</a>
+        
+        
+ |         <a href="/musings/post-11-star-wars-theming/">Next →</a>
+      </p>
+    </div>
     
     <div class="post-footer">
       <p><a href="/musings/">← Back to all musings</a></p>

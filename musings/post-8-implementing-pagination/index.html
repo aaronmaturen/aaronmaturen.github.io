@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Adding pagination to our Star Wars character table using Angular Material's MatPaginator" />
+    <meta name="description" content="Building client and server-side pagination with infinite scrolling and virtual scrolling techniques for large Star Wars datasets" />
     <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
-    <title>Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Pagination</title>
+    <title>Galactic Archives - Implementing Pagination</title>
     <link rel="stylesheet" href="/assets/css/tufte.min.css" />
     <link rel="stylesheet" href="/assets/css/prism-theme.css" />
     <link rel="stylesheet" href="/assets/css/custom.css" />
@@ -28,12 +28,12 @@
 </nav>
         
 <header>
-  <h1>Angular DataSource with SWAPI: Building the Galactic Archives - Implementing Pagination</h1>
-  <p class="subtitle">June 9, 2025</p>
+  <h1>Galactic Archives - Implementing Pagination</h1>
+  <p class="subtitle">June 8, 2025</p>
   
   <p class="code-links">
-    <a href="https://github.com/aaronmaturen/galactic-archive/tree/post-8" target="_blank" rel="noopener">View on GitHub</a> | 
-    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archive/tree/post-8" target="_blank" rel="noopener">Run on StackBlitz</a>
+    <a href="https://github.com/aaronmaturen/galactic-archives/tree/post-8" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archives/tree/post-8" target="_blank" rel="noopener">Run on StackBlitz</a>
   </p>
 </header>
 
@@ -63,22 +63,16 @@
 <h2>Implementing MatTable</h2>
 <p>First, let's update our imports to include the necessary Material modules:</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/components/character-list/character-list.component.ts</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  Component<span class="token punctuation">,</span>
-  OnInit<span class="token punctuation">,</span>
-  OnDestroy<span class="token punctuation">,</span>
-  ViewChild<span class="token punctuation">,</span>
-  AfterViewInit<span class="token punctuation">,</span>
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/core"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> CommonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/common"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> MatTableModule<span class="token punctuation">,</span> MatTable <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/table"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> MatProgressSpinnerModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/progress-spinner"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> MatPaginatorModule<span class="token punctuation">,</span> MatPaginator <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/paginator"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> MatIconModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@angular/material/icon"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> StarWarsService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../../core/services/star-wars.service"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> GalacticDataSource <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../datasources/galactic.datasource"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> Character <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"../../../../core/models/character.interface"</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> Subscription <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"rxjs"</span><span class="token punctuation">;</span></code></pre>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Component<span class="token punctuation">,</span> OnInit<span class="token punctuation">,</span> OnDestroy<span class="token punctuation">,</span> inject<span class="token punctuation">,</span> ViewChild<span class="token punctuation">,</span> AfterViewInit <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/core'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> CommonModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/common'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatTableModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/material/table'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatProgressSpinnerModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/material/progress-spinner'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatPaginatorModule<span class="token punctuation">,</span> MatPaginator <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/material/paginator'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> MatIconModule <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/material/icon'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> StarWarsService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../../../core/services/star-wars.service'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> GalacticDataSource <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../datasources/galactic-datasource'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Character <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../../../models/character.model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Subscription <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'rxjs'</span><span class="token punctuation">;</span></code></pre>
 <p>Notice we've added several new imports:</p>
 <ul>
 <li><code>MatTableModule</code> and <code>MatTable</code> for our table component</li>
@@ -107,32 +101,44 @@ Now let's look at the template where most of the magic happens:
 ```typescript
   template: `
     &lt;div class=&quot;tw-container tw-mx-auto tw-p-4&quot;&gt;
-      &lt;h1 class=&quot;tw-text-2xl tw-font-bold tw-mb-4&quot;&gt;Galactic Archives: Character Database&lt;/h1&gt;
+      &lt;h1 data-testid=&quot;character-list-heading&quot; class=&quot;tw-text-2xl tw-font-bold tw-mb-4&quot;&gt;
+        Galactic Archives: Character Database
+      &lt;/h1&gt;
 
       &lt;!-- Loading indicator --&gt;
-      &lt;div *ngIf=&quot;loading&quot; class=&quot;tw-flex tw-justify-center tw-my-8&quot;&gt;
+      &lt;div *ngIf=&quot;loading &amp;&amp; !characters.length&quot; class=&quot;tw-flex tw-justify-center tw-my-8&quot;&gt;
         &lt;mat-spinner diameter=&quot;50&quot;&gt;&lt;/mat-spinner&gt;
       &lt;/div&gt;
 
       &lt;!-- Error message display --&gt;
-      &lt;div *ngIf=&quot;error&quot; class=&quot;tw-bg-red-100 tw-border-l-4 tw-border-red-500 tw-text-red-700 tw-p-4 tw-mb-4&quot;&gt;
+      &lt;div
+        *ngIf=&quot;error&quot;
+        data-testid=&quot;error-message&quot;
+        class=&quot;tw-bg-red-100 tw-border-l-4 tw-border-red-500 tw-text-red-700 tw-p-4 tw-mb-4&quot;
+      &gt;
         
       &lt;/div&gt;
 </code></pre>
 <p>We start with a container for our component, a title, and handling for loading and error states. Notice we're using Tailwind CSS classes with the <code>tw-</code> prefix as per our project standards.</p>
 <p>Next comes the table implementation:</p>
-<pre class="language-typescript"><code class="language-typescript">      <span class="token operator">&lt;</span>div <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-bg-gray-900 tw-rounded-lg tw-overflow-hidden tw-shadow-lg"</span><span class="token operator">></span>
+<pre class="language-typescript"><code class="language-typescript">      <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Table container <span class="token keyword">with</span> Star Wars theme <span class="token operator">--</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>div <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-bg-white tw-rounded-lg tw-overflow-hidden tw-shadow-lg"</span><span class="token operator">></span>
         <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> The MatTable <span class="token keyword">with</span> our DataSource <span class="token operator">--</span><span class="token operator">></span>
-        <span class="token operator">&lt;</span>table mat<span class="token operator">-</span>table <span class="token punctuation">[</span>dataSource<span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"dataSource"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-w-full"</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span>table mat<span class="token operator">-</span>table <span class="token punctuation">[</span>dataSource<span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"dataSource"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-w-full"</span> data<span class="token operator">-</span>testid<span class="token operator">=</span><span class="token string">"character-table"</span><span class="token operator">></span>
           <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Name Column <span class="token operator">--</span><span class="token operator">></span>
           <span class="token operator">&lt;</span>ng<span class="token operator">-</span>container matColumnDef<span class="token operator">=</span><span class="token string">"name"</span><span class="token operator">></span>
-            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-yellow-400"</span><span class="token operator">></span>
+            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-blue-700"</span><span class="token operator">></span>
               <span class="token operator">&lt;</span>div <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-flex tw-items-center"</span><span class="token operator">></span>
-                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-yellow-400"</span><span class="token operator">></span>person<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
+                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-blue-700"</span><span class="token operator">></span>person<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
                 <span class="token operator">&lt;</span>span<span class="token operator">></span><span class="token constant">NAME</span><span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>th<span class="token operator">></span>
-            <span class="token operator">&lt;</span>td mat<span class="token operator">-</span>cell <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-yellow-400 tw-font-medium"</span><span class="token operator">></span>
+            <span class="token operator">&lt;</span>td
+              mat<span class="token operator">-</span>cell
+              <span class="token operator">*</span>matCellDef<span class="token operator">=</span><span class="token string">"let character"</span>
+              <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-black tw-font-medium"</span>
+              data<span class="token operator">-</span>testid<span class="token operator">=</span><span class="token string">"character-name"</span>
+            <span class="token operator">></span>
               
             <span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
           <span class="token operator">&lt;</span><span class="token operator">/</span>ng<span class="token operator">-</span>container<span class="token operator">></span></code></pre>
@@ -140,9 +146,9 @@ Now let's look at the template where most of the magic happens:
 <p>Let's continue with the remaining columns:</p>
 <pre class="language-typescript"><code class="language-typescript">          <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Gender Column <span class="token operator">--</span><span class="token operator">></span>
           <span class="token operator">&lt;</span>ng<span class="token operator">-</span>container matColumnDef<span class="token operator">=</span><span class="token string">"gender"</span><span class="token operator">></span>
-            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-yellow-400"</span><span class="token operator">></span>
+            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-blue-700"</span><span class="token operator">></span>
               <span class="token operator">&lt;</span>div <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-flex tw-items-center"</span><span class="token operator">></span>
-                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-yellow-400"</span><span class="token operator">></span>wc<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
+                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-blue-700"</span><span class="token operator">></span>wc<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
                 <span class="token operator">&lt;</span>span<span class="token operator">></span><span class="token constant">GENDER</span><span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>th<span class="token operator">></span>
@@ -151,9 +157,9 @@ Now let's look at the template where most of the magic happens:
 
           <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Birth Year Column <span class="token operator">--</span><span class="token operator">></span>
           <span class="token operator">&lt;</span>ng<span class="token operator">-</span>container matColumnDef<span class="token operator">=</span><span class="token string">"birth_year"</span><span class="token operator">></span>
-            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-yellow-400"</span><span class="token operator">></span>
+            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-blue-700"</span><span class="token operator">></span>
               <span class="token operator">&lt;</span>div <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-flex tw-items-center"</span><span class="token operator">></span>
-                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-yellow-400"</span><span class="token operator">></span>cake<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
+                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-blue-700"</span><span class="token operator">></span>cake<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
                 <span class="token operator">&lt;</span>span<span class="token operator">></span><span class="token constant">BIRTH</span> <span class="token constant">YEAR</span><span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>th<span class="token operator">></span>
@@ -162,9 +168,9 @@ Now let's look at the template where most of the magic happens:
 
           <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Height Column <span class="token operator">--</span><span class="token operator">></span>
           <span class="token operator">&lt;</span>ng<span class="token operator">-</span>container matColumnDef<span class="token operator">=</span><span class="token string">"height"</span><span class="token operator">></span>
-            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-yellow-400"</span><span class="token operator">></span>
+            <span class="token operator">&lt;</span>th mat<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token operator">*</span>matHeaderCellDef <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-blue-700"</span><span class="token operator">></span>
               <span class="token operator">&lt;</span>div <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-flex tw-items-center"</span><span class="token operator">></span>
-                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-yellow-400"</span><span class="token operator">></span>height<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
+                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mr-1 tw-text-base tw-text-blue-700"</span><span class="token operator">></span>height<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
                 <span class="token operator">&lt;</span>span<span class="token operator">></span><span class="token constant">HEIGHT</span><span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>th<span class="token operator">></span>
@@ -180,38 +186,54 @@ Now let's look at the template where most of the magic happens:
           <span class="token operator">&lt;</span>tr <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mat-row"</span> <span class="token operator">*</span>matNoDataRow<span class="token operator">></span>
             <span class="token operator">&lt;</span>td <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-mat-cell tw-p-4 tw-text-center"</span> colspan<span class="token operator">=</span><span class="token string">"4"</span><span class="token operator">></span>
               <span class="token operator">&lt;</span>div <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-flex tw-flex-col tw-items-center tw-py-8"</span><span class="token operator">></span>
-                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-4xl tw-text-gray-500 tw-mb-2"</span><span class="token operator">></span>sentiment_very_dissatisfied<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon<span class="token operator">></span>
+                <span class="token operator">&lt;</span>mat<span class="token operator">-</span>icon <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-4xl tw-text-gray-500 tw-mb-2"</span>
+                  <span class="token operator">></span>sentiment_very_dissatisfied<span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>icon
+                <span class="token operator">></span>
                 <span class="token operator">&lt;</span>span <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-text-gray-500"</span><span class="token operator">></span>No characters found <span class="token keyword">in</span> the archives<span class="token operator">&lt;</span><span class="token operator">/</span>span<span class="token operator">></span>
               <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
             <span class="token operator">&lt;</span><span class="token operator">/</span>td<span class="token operator">></span>
           <span class="token operator">&lt;</span><span class="token operator">/</span>tr<span class="token operator">></span>
-        <span class="token operator">&lt;</span><span class="token operator">/</span>table<span class="token operator">></span></code></pre>
-<p>The <code>*matHeaderRowDef</code> and <code>*matRowDef</code> directives tell Angular how to render the header and data rows. We also include a special template for when there's no data to display.</p>
-<p>Finally, we add the paginator:</p>
-<pre class="language-typescript"><code class="language-typescript">        <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Pagination control <span class="token operator">--</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span><span class="token operator">/</span>table<span class="token operator">></span>
+
+        <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Loading indicator <span class="token keyword">for</span> when data <span class="token keyword">is</span> loading but we have existing data <span class="token operator">--</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span>div <span class="token operator">*</span>ngIf<span class="token operator">=</span><span class="token string">"loading &amp;&amp; characters.length"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-flex tw-justify-center tw-py-4"</span><span class="token operator">></span>
+          <span class="token operator">&lt;</span>mat<span class="token operator">-</span>spinner diameter<span class="token operator">=</span><span class="token string">"30"</span><span class="token operator">></span><span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>spinner<span class="token operator">></span>
+        <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
+
+        <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> Paginator <span class="token keyword">with</span> Star Wars theme <span class="token operator">--</span><span class="token operator">></span>
         <span class="token operator">&lt;</span>mat<span class="token operator">-</span>paginator
-          <span class="token punctuation">[</span>length<span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"totalCharacters"</span>
+          <span class="token punctuation">[</span>length<span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"totalCount"</span>
           <span class="token punctuation">[</span>pageSize<span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"pageSize"</span>
-          <span class="token punctuation">[</span>pageSizeOptions<span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"[5, 10, 20]"</span>
-          aria<span class="token operator">-</span>label<span class="token operator">=</span><span class="token string">"Select page of characters"</span><span class="token operator">></span>
-        <span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>paginator<span class="token operator">></span>
+          <span class="token punctuation">[</span>pageSizeOptions<span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"[5, 10, 25]"</span>
+          aria<span class="token operator">-</span>label<span class="token operator">=</span><span class="token string">"Select page of characters"</span>
+          <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tw-bg-gray-100 tw-border-t tw-border-gray-200"</span>
+        <span class="token operator">></span><span class="token operator">&lt;</span><span class="token operator">/</span>mat<span class="token operator">-</span>paginator<span class="token operator">></span>
       <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
     <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
   <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">,
-  styles: [</span><span class="token template-punctuation string">`</span></span>
-    <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>row<span class="token operator">:</span>nth<span class="token operator">-</span><span class="token function">child</span><span class="token punctuation">(</span>even<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      background<span class="token operator">-</span>color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">0.05</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+  styles: [
+    </span><span class="token template-punctuation string">`</span></span>
+      <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>row<span class="token operator">:</span>nth<span class="token operator">-</span><span class="token function">child</span><span class="token punctuation">(</span>even<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        background<span class="token operator">-</span>color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.05</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
 
-    <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>row<span class="token operator">:</span>hover <span class="token punctuation">{</span>
-      background<span class="token operator">-</span>color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+      <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>row<span class="token operator">:</span>hover <span class="token punctuation">{</span>
+        background<span class="token operator">-</span>color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
 
-    <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>cell<span class="token punctuation">,</span> <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token punctuation">{</span>
-      color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">255</span><span class="token punctuation">,</span> <span class="token number">0.7</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      padding<span class="token operator">:</span> 16px<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-  `<span class="token punctuation">]</span>
+      <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>cell<span class="token punctuation">,</span>
+      <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token punctuation">{</span>
+        color<span class="token operator">:</span> #<span class="token number">000000</span><span class="token punctuation">;</span>
+        padding<span class="token operator">:</span> 16px<span class="token punctuation">;</span>
+        border<span class="token operator">-</span>bottom<span class="token operator">:</span> 1px solid <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+
+      <span class="token punctuation">.</span>mat<span class="token operator">-</span>mdc<span class="token operator">-</span>header<span class="token operator">-</span>cell <span class="token punctuation">{</span>
+        background<span class="token operator">-</span>color<span class="token operator">:</span> <span class="token function">rgba</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.03</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        font<span class="token operator">-</span>weight<span class="token operator">:</span> <span class="token number">600</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    `<span class="token punctuation">,</span>
+  <span class="token punctuation">]</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
 <p>We've added some styles to make our table look more like a Star Wars terminal - with subtle zebra striping, hover effects, and proper spacing. The dark background with light text gives it that &quot;galactic database&quot; feel.</p>
 <blockquote>
@@ -220,41 +242,48 @@ Now let's look at the template where most of the magic happens:
 <p>Now let's look at the component class implementation:</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CharacterListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span><span class="token punctuation">,</span> AfterViewInit<span class="token punctuation">,</span> OnDestroy <span class="token punctuation">{</span>
   <span class="token comment">// Properties for our table and pagination</span>
-  dataSource<span class="token operator">:</span> GalacticDataSource<span class="token punctuation">;</span>
+  characters<span class="token operator">:</span> Character<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
   displayedColumns<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token string">'gender'</span><span class="token punctuation">,</span> <span class="token string">'birth_year'</span><span class="token punctuation">,</span> <span class="token string">'height'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-  totalCharacters <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
   pageSize <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
   loading <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
   error <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+  totalCount <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
 
   <span class="token comment">// Reference to the paginator in our template</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">ViewChild</span></span><span class="token punctuation">(</span>MatPaginator<span class="token punctuation">)</span> paginator<span class="token operator">!</span><span class="token operator">:</span> MatPaginator<span class="token punctuation">;</span>
 
-  <span class="token comment">// For managing all our subscriptions</span>
-  <span class="token keyword">private</span> subscriptions <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Subscription</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> starWarsService<span class="token operator">:</span> StarWarsService<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Create our DataSource instance</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GalacticDataSource</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">}</span>
+  <span class="token comment">// Services and DataSource</span>
+  <span class="token keyword">private</span> starWarsService <span class="token operator">=</span> <span class="token function">inject</span><span class="token punctuation">(</span>StarWarsService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  dataSource<span class="token operator">!</span><span class="token operator">:</span> GalacticDataSource<span class="token punctuation">;</span> <span class="token comment">// Using definite assignment assertion</span>
+  <span class="token keyword">private</span> subscription <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Subscription</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
   <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Subscribe to loading state from our DataSource</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>subscriptions<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+    <span class="token comment">// Create our DataSource instance</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GalacticDataSource</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Subscribe to character data changes</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span><span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>characters <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>characters <span class="token operator">=</span> characters<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Subscribe to loading state</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span>loading$<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>isLoading <span class="token operator">=></span> <span class="token punctuation">{</span>
         <span class="token keyword">this</span><span class="token punctuation">.</span>loading <span class="token operator">=</span> isLoading<span class="token punctuation">;</span>
       <span class="token punctuation">}</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token comment">// Subscribe to count to determine total characters</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>subscriptions<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+    <span class="token comment">// Subscribe to count</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span>count$<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>count <span class="token operator">=></span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>totalCharacters <span class="token operator">=</span> count<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>totalCount <span class="token operator">=</span> count<span class="token punctuation">;</span>
       <span class="token punctuation">}</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token comment">// Initial data load</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Initial data load - start with page 1 and current page size</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
 <p>In <code>ngOnInit()</code>, we set up subscriptions to our DataSource's observables. This is where we connect the component's state to the DataSource's state. We're subscribing to:</p>
 <ol>
@@ -262,21 +291,36 @@ Now let's look at the template where most of the magic happens:
 <li><code>count$</code> - to update the total number of characters for the paginator</li>
 </ol>
 <p>We also trigger the initial data load.</p>
+<blockquote>
+<p>The Council of Patterns warns: &quot;Never access ViewChild references in ngOnInit() - they are undefined until the view is initialized. Many a padawan has fallen into this trap, leading to the dreaded 'undefined' errors in the console.&quot;</p>
+</blockquote>
 <pre class="language-typescript"><code class="language-typescript">  <span class="token function">ngAfterViewInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Connect paginator to the dataSource</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>subscriptions<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>paginator<span class="token punctuation">.</span>page<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>event <span class="token operator">=></span> <span class="token punctuation">{</span>
-        <span class="token comment">// Convert from 0-based to 1-based pagination for the API</span>
-        <span class="token keyword">const</span> apiPage <span class="token operator">=</span> event<span class="token punctuation">.</span>pageIndex <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span>apiPage<span class="token punctuation">,</span> event<span class="token punctuation">.</span>pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">}</span><span class="token punctuation">)</span>
-    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Connect paginator to our datasource after view init</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>paginator<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token comment">// Handle paginator events</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>paginator<span class="token punctuation">.</span>page<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>event <span class="token operator">=></span> <span class="token punctuation">{</span>
+          <span class="token comment">// Convert from 0-based to 1-based pagination for the API</span>
+          <span class="token keyword">const</span> apiPage <span class="token operator">=</span> event<span class="token punctuation">.</span>pageIndex <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
+          <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span>apiPage<span class="token punctuation">,</span> event<span class="token punctuation">.</span>pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">ngOnDestroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Clean up subscriptions when the component is destroyed</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// The DataSource will handle its own cleanup in disconnect()</span>
   <span class="token punctuation">}</span></code></pre>
 <p>The <code>ngAfterViewInit()</code> lifecycle hook runs after Angular has fully initialized the component's view. This is important because we need to access the <code>paginator</code> reference which isn't available until the view is initialized. Here we subscribe to the paginator's page events to reload data when the user changes pages.</p>
 <blockquote>
 <p>The Council of Patterns warns: &quot;Never access ViewChild references in ngOnInit() - they are undefined until the view is initialized. Many a padawan has fallen into this trap, leading to the dreaded 'undefined' errors in the console.&quot;</p>
 </blockquote>
 <pre class="language-typescript"><code class="language-typescript">  <span class="token function">ngOnDestroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Clean up subscriptions when the component is destroyed</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// The DataSource will handle its own cleanup in disconnect()</span>
     <span class="token comment">// Clean up subscriptions</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>subscriptions<span class="token punctuation">.</span><span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
@@ -286,8 +330,7 @@ Now let's look at the template where most of the magic happens:
     <span class="token keyword">try</span> <span class="token punctuation">{</span>
       <span class="token comment">// Update the page size if it changed</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>pageSize <span class="token operator">=</span> pageSize<span class="token punctuation">;</span>
-
-      <span class="token comment">// Tell our DataSource to load the characters for this page and page size</span>
+      <span class="token comment">// Let the DataSource handle loading the data</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>dataSource<span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>error <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Failed to load characters: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>error <span class="token keyword">instanceof</span> <span class="token class-name">Error</span> <span class="token operator">?</span> error<span class="token punctuation">.</span>message <span class="token operator">:</span> <span class="token string">'Unknown error'</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">. The Cosmic Compiler is displeased.</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
@@ -297,14 +340,21 @@ Now let's look at the template where most of the magic happens:
 <h2>Updating the DataSource for Pagination</h2>
 <p>Now, let's enhance our GalacticDataSource to handle pagination properly. We'll build on the foundation we created in the previous post, adding new features specifically for pagination.</p>
 <p>First, let's look at the imports and state management:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/datasources/galactic.datasource.ts</span>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/features/star-wars/datasources/galactic-datasource.ts</span>
 <span class="token keyword">import</span> <span class="token punctuation">{</span> DataSource <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/cdk/collections'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> BehaviorSubject<span class="token punctuation">,</span> Observable<span class="token punctuation">,</span> finalize <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'rxjs'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> Character <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../../core/models/character.interface'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> BehaviorSubject<span class="token punctuation">,</span> Observable<span class="token punctuation">,</span> Subscription <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'rxjs'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> finalize <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'rxjs/operators'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Character <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../../models/character.model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{</span> StarWarsService <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../../core/services/star-wars.service'</span><span class="token punctuation">;</span>
 
+<span class="token comment">/**
+ * GalacticDataSource - A DataSource implementation for Star Wars characters
+ *
+ * As the Ancient Order of Angular foretold, "The DataSource shall liberate thy components
+ * from the burden of data management, allowing them to focus on their true purpose."
+ */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">GalacticDataSource</span> <span class="token keyword">extends</span> <span class="token class-name">DataSource<span class="token operator">&lt;</span>Character<span class="token operator">></span></span> <span class="token punctuation">{</span>
-  <span class="token comment">// Internal subjects to manage state</span>
+  <span class="token comment">// BehaviorSubjects to manage internal state</span>
   <span class="token keyword">private</span> charactersSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span>Character<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">private</span> loadingSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span><span class="token builtin">boolean</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">private</span> countSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BehaviorSubject<span class="token operator">&lt;</span><span class="token builtin">number</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -315,7 +365,10 @@ Now let's look at the template where most of the magic happens:
   <span class="token keyword">public</span> loading$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">public</span> count$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">public</span> page$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pageSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token keyword">public</span> pageSize$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Expose page size observable</span></code></pre>
+  <span class="token keyword">public</span> pageSize$ <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Track active subscriptions for cleanup</span>
+  <span class="token keyword">private</span> subscription <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Subscription</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 <p>The key addition here is the <code>pageSubject</code> which tracks the current page. This allows components to react to page changes and enables features like &quot;current page&quot; indicators. We expose this as a public observable <code>page$</code> that components can subscribe to.</p>
 <blockquote>
 <p>The Recursive Philosopher once said, &quot;To truly understand state management, one must first understand that state is merely a snapshot of truth at a given moment in time.&quot; The Ancient Order of Angular nodded in agreement, then proceeded to create BehaviorSubject to make this philosophical concept concrete.</p>
@@ -325,26 +378,34 @@ Now let's look at the template where most of the magic happens:
     <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 
+  <span class="token comment">/**
+   * Connect function that's called by the table to retrieve a stream of data
+   * The Cosmic Compiler demands a proper implementation of this abstract method
+   */</span>
   <span class="token function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>Character<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
     <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span>
 
+  <span class="token comment">/**
+   * Disconnect function that's called when the table is destroyed
+   * The Council of Patterns insists on proper cleanup to prevent memory leaks
+   */</span>
   <span class="token function">disconnect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>pageSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Complete page size subject to prevent memory leaks</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
 <p>The <code>connect()</code> method remains the same as before - it's the bridge between our DataSource and the table. The <code>disconnect()</code> method now includes completing our new <code>pageSubject</code> to prevent memory leaks.</p>
 <p>Now for the most important part - loading data with pagination:</p>
 <pre class="language-typescript"><code class="language-typescript">  <span class="token comment">/**
-   * Load characters from the API with pagination
-   * @param page The page number to load (1-based for SWAPI)
+   * Load characters from the Star Wars API
+   * @param page The page number to load (1-based)
    * @param pageSize The number of items per page
-   * @param filter Optional filter term
    */</span>
-  <span class="token function">loadCharacters</span><span class="token punctuation">(</span>page<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> pageSize<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span>value<span class="token punctuation">,</span> filter<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token function">loadCharacters</span><span class="token punctuation">(</span>page<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> pageSize<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span>value<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>pageSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>page<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -352,24 +413,34 @@ Now let's look at the template where most of the magic happens:
     <span class="token comment">// Log the request parameters for debugging</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Loading characters: page=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>page<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">, pageSize=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>pageSize<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token comment">// Always replace data when using pagination</span>
+    <span class="token comment">// Clear current data when loading new page</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token keyword">const</span> request$ <span class="token operator">=</span> filter
-      <span class="token operator">?</span> <span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService<span class="token punctuation">.</span><span class="token function">searchCharacters</span><span class="token punctuation">(</span>filter<span class="token punctuation">)</span>
-      <span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService<span class="token punctuation">.</span><span class="token function">getCharacters</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> request <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService
+      <span class="token punctuation">.</span><span class="token function">getCharacters</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> pageSize<span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">finalize</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    request$<span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
-      <span class="token function">finalize</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-    <span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-      <span class="token function-variable function">next</span><span class="token operator">:</span> <span class="token punctuation">(</span>response<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>results<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>count<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> subscription <span class="token operator">=</span> request<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      <span class="token function-variable function">next</span><span class="token operator">:</span> response <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token comment">// Update our subjects with the new data</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>
+          response<span class="token punctuation">.</span>results
+            <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>item <span class="token operator">=></span> item<span class="token punctuation">.</span>properties<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">(</span>char<span class="token punctuation">)</span><span class="token operator">:</span> char <span class="token keyword">is</span> Character <span class="token operator">=></span> char <span class="token operator">!==</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>total_records<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">}</span><span class="token punctuation">,</span>
-      <span class="token function-variable function">error</span><span class="token operator">:</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      <span class="token function-variable function">error</span><span class="token operator">:</span> error <span class="token operator">=></span> <span class="token punctuation">{</span>
         <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">'Error loading characters:'</span><span class="token punctuation">,</span> error<span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">}</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>countSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// Keep the current page and page size values to allow retry</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
     <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Add to our subscription for cleanup</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>subscription<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
 <p>There are several key changes in this method:</p>
 <ol>
@@ -420,14 +491,26 @@ Now let's look at the template where most of the magic happens:
 <h2>Updating the StarWarsService for Page Size Support</h2>
 <p>To fully support pagination with dynamic page sizes, we need to update our StarWarsService to accept and use the page size parameter when making API requests:</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/app/core/services/star-wars.service.ts</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Injectable<span class="token punctuation">,</span> inject <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/core'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> HttpClient<span class="token punctuation">,</span> HttpErrorResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/common/http'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Observable<span class="token punctuation">,</span> throwError <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'rxjs'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> catchError<span class="token punctuation">,</span> retry<span class="token punctuation">,</span> map <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'rxjs/operators'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> environment <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../../environments/environment'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Character<span class="token punctuation">,</span> CharacterListItem <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../models/character.model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> ApiResponse<span class="token punctuation">,</span> ApiDetailResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'../../models/api-response.model'</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Type aliases for our specific use cases</span>
+<span class="token keyword">type</span> <span class="token class-name">CharacterResponse</span> <span class="token operator">=</span> ApiResponse<span class="token operator">&lt;</span>CharacterListItem<span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">CharacterDetailResponse</span> <span class="token operator">=</span> ApiDetailResponse<span class="token operator">&lt;</span>Character<span class="token operator">></span><span class="token punctuation">;</span>
+
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-  providedIn<span class="token operator">:</span> <span class="token string">"root"</span><span class="token punctuation">,</span> <span class="token comment">// The Ancient Order approves of this modern injection approach</span>
+  providedIn<span class="token operator">:</span> <span class="token string">'root'</span><span class="token punctuation">,</span> <span class="token comment">// The Ancient Order approves of this modern injection approach</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">StarWarsService</span> <span class="token punctuation">{</span>
   <span class="token keyword">private</span> apiUrl <span class="token operator">=</span> environment<span class="token punctuation">.</span>apiUrl<span class="token punctuation">;</span>
   <span class="token keyword">private</span> http <span class="token operator">=</span> <span class="token function">inject</span><span class="token punctuation">(</span>HttpClient<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  <span class="token comment">// Fetch all characters with optional pagination and page size</span>
+  <span class="token comment">// Fetch all characters with optional pagination</span>
   <span class="token function">getCharacters</span><span class="token punctuation">(</span>page <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> pageSize <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token operator">:</span> Observable<span class="token operator">&lt;</span>CharacterResponse<span class="token operator">></span> <span class="token punctuation">{</span>
     <span class="token comment">// The Cosmic Compiler demands proper URL formatting</span>
     <span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>apiUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">people?page=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>page<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;limit=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>pageSize<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">&amp;expanded=true</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
@@ -456,10 +539,14 @@ Now let's look at the template where most of the magic happens:
 <h2>Handling Pagination Events</h2>
 <p>The MatPaginator emits events when the user changes the page or page size. We subscribe to these events in the <code>ngAfterViewInit</code> lifecycle hook:</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token function">ngAfterViewInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
-  <span class="token comment">// Connect paginator to the dataSource</span>
-  <span class="token keyword">this</span><span class="token punctuation">.</span>paginator<span class="token punctuation">.</span>page<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>paginator<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>paginator<span class="token punctuation">.</span>page<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>event <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> apiPage <span class="token operator">=</span> event<span class="token punctuation">.</span>pageIndex <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// Convert from 0-based to 1-based for API</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadCharacters</span><span class="token punctuation">(</span>apiPage<span class="token punctuation">,</span> event<span class="token punctuation">.</span>pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
 <p>The <code>page</code> event contains valuable information:</p>
 <ul>
@@ -468,23 +555,36 @@ Now let's look at the template where most of the magic happens:
 <li><code>length</code>: The total number of items</li>
 <li><code>previousPageIndex</code>: The previous page index</li>
 </ul>
+<p>Notice a few important details in our implementation:</p>
+<ol>
+<li>We check if <code>this.paginator</code> exists before trying to subscribe to it</li>
+<li>We add the subscription to our composite <code>subscription</code> object for proper cleanup</li>
+<li>We convert from the 0-based index used by Angular Material to the 1-based index used by our API</li>
+<li>We pass both the page and page size to our <code>loadCharacters</code> method</li>
+</ol>
 <p>By subscribing to this event, we create a reactive system where any user interaction with the paginator automatically triggers a data reload with the appropriate parameters.</p>
 <h2>Managing State During Pagination</h2>
 <p>Unlike infinite scroll implementations where we append new data to existing data, with pagination we replace the entire dataset on each page change:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token function">loadCharacters</span><span class="token punctuation">(</span>page<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> filter<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">loadCharacters</span><span class="token punctuation">(</span>page<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> pageSize<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span>value<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
   <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">this</span><span class="token punctuation">.</span>pageSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>page<span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-  <span class="token comment">// Always replace data when using pagination</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>pageSizeSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>pageSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">this</span><span class="token punctuation">.</span>charactersSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  <span class="token comment">// ... rest of the method</span>
+  <span class="token keyword">const</span> request <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>starWarsService
+    <span class="token punctuation">.</span><span class="token function">getCharacters</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> pageSize<span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">finalize</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span>loadingSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> subscription <span class="token operator">=</span> request<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>subscription<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>subscription<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span></code></pre>
 <p>This replacement approach has several benefits:</p>
 <ol>
-<li><strong>Memory efficiency</strong>: We only keep the current page in memory</li>
-<li><strong>Simpler state management</strong>: No need to track which items belong to which page</li>
-<li><strong>Consistent with user expectations</strong>: Users expect to see only the current page's data</li>
+<li><strong>Memory efficiency</strong>: We only keep the current page in memory, which is especially important when dealing with potentially large datasets</li>
+<li><strong>Simpler state management</strong>: No need to track which items belong to which page or maintain complex caching logic</li>
+<li><strong>Consistent with user expectations</strong>: Users expect to see only the current page's data when using a paginated interface</li>
+<li><strong>Cleaner UI transitions</strong>: By clearing the data before loading new data, we avoid showing stale data during page transitions</li>
+<li><strong>Better error handling</strong>: If an error occurs during loading, we don't have a mix of old and new data</li>
 </ol>
 <blockquote>
 <p>The Cosmic Compiler once witnessed a developer trying to implement pagination by keeping all pages in memory and just showing/hiding rows. It promptly crashed the developer's IDE and left a single error message: &quot;The path to efficient pagination is not through hiding, but through loading only what is needed.&quot;</p>
@@ -493,11 +593,17 @@ Now let's look at the template where most of the magic happens:
 <p>Our implementation includes several accessibility features:</p>
 <ol>
 <li>The paginator has an <code>aria-label</code> that describes its purpose</li>
-<li>Table headers use proper <code>scope=&quot;col&quot;</code> attributes</li>
-<li>The loading spinner provides visual feedback during page transitions</li>
-<li>Error messages are clearly displayed when issues occur</li>
+<li>We've added <code>data-testid</code> attributes to key elements for better testing and automation</li>
+<li>The loading spinner provides visual feedback during page transitions with different states:
+<ul>
+<li>Full-screen spinner when no data is available</li>
+<li>Smaller spinner at the bottom when changing pages with existing data</li>
+</ul>
+</li>
+<li>Error messages are clearly displayed when issues occur with appropriate styling</li>
+<li>Proper color contrast in our UI elements using our branding colors</li>
 </ol>
-<p>These considerations ensure that our galactic database is usable by all beings across the universe, regardless of their abilities or the assistive technologies they might be using.</p>
+<p>These considerations ensure that our galactic database is usable by all beings across the universe, regardless of their abilities or the assistive technologies they might be using. The Ancient Order of Angular has always emphasized that accessibility is not an afterthought but a fundamental aspect of good application design.</p>
 <h2>Testing Our Paginated Table</h2>
 <p>Let's run our application and see our new table with pagination in action:</p>
 <pre class="language-bash"><code class="language-bash">ng serve</code></pre>
@@ -509,22 +615,71 @@ Now let's look at the template where most of the magic happens:
 <li>Options to change the page size</li>
 </ol>
 <p>Try clicking through different pages and changing the page size. Notice how the DataSource handles these interactions smoothly, updating the display and maintaining the correct state.</p>
+<h3>Automated Testing</h3>
+<p>We've added <code>data-testid</code> attributes to key elements to make our component easier to test. Here's a simple test that verifies our pagination functionality:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">'CharacterListComponent'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> component<span class="token operator">:</span> CharacterListComponent<span class="token punctuation">;</span>
+  <span class="token keyword">let</span> fixture<span class="token operator">:</span> ComponentFixture<span class="token operator">&lt;</span>CharacterListComponent<span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">let</span> mockStarWarsService<span class="token operator">:</span> jasmine<span class="token punctuation">.</span>SpyObj<span class="token operator">&lt;</span>StarWarsService<span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token function">beforeEach</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    mockStarWarsService <span class="token operator">=</span> jasmine<span class="token punctuation">.</span><span class="token function">createSpyObj</span><span class="token punctuation">(</span><span class="token string">'StarWarsService'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">'getCharacters'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">await</span> TestBed<span class="token punctuation">.</span><span class="token function">configureTestingModule</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      imports<span class="token operator">:</span> <span class="token punctuation">[</span>CharacterListComponent<span class="token punctuation">,</span> MatPaginatorModule<span class="token punctuation">,</span> MatTableModule<span class="token punctuation">]</span><span class="token punctuation">,</span>
+      providers<span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">{</span> provide<span class="token operator">:</span> StarWarsService<span class="token punctuation">,</span> useValue<span class="token operator">:</span> mockStarWarsService <span class="token punctuation">}</span>
+      <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">compileComponents</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    mockStarWarsService<span class="token punctuation">.</span>getCharacters<span class="token punctuation">.</span>and<span class="token punctuation">.</span><span class="token function">returnValue</span><span class="token punctuation">(</span><span class="token keyword">of</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      results<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> uid<span class="token operator">:</span> <span class="token string">'1'</span><span class="token punctuation">,</span> properties<span class="token operator">:</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token string">'Luke Skywalker'</span><span class="token punctuation">,</span> gender<span class="token operator">:</span> <span class="token string">'male'</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      total_records<span class="token operator">:</span> <span class="token number">82</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    fixture <span class="token operator">=</span> TestBed<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>CharacterListComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    component <span class="token operator">=</span> fixture<span class="token punctuation">.</span>componentInstance<span class="token punctuation">;</span>
+    fixture<span class="token punctuation">.</span><span class="token function">detectChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">'should load characters and update pagination'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>mockStarWarsService<span class="token punctuation">.</span>getCharacters<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toHaveBeenCalledWith</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>component<span class="token punctuation">.</span>totalCount<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token number">82</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Simulate page change</span>
+    <span class="token keyword">const</span> paginator <span class="token operator">=</span> fixture<span class="token punctuation">.</span>debugElement<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>By<span class="token punctuation">.</span><span class="token function">directive</span><span class="token punctuation">(</span>MatPaginator<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> paginatorComponent <span class="token operator">=</span> paginator<span class="token punctuation">.</span>componentInstance<span class="token punctuation">;</span>
+    paginatorComponent<span class="token punctuation">.</span>pageIndex <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    paginatorComponent<span class="token punctuation">.</span>page<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token punctuation">{</span> pageIndex<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> pageSize<span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span> length<span class="token operator">:</span> <span class="token number">82</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">expect</span><span class="token punctuation">(</span>mockStarWarsService<span class="token punctuation">.</span>getCharacters<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toHaveBeenCalledWith</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>This test verifies that:</p>
+<ol>
+<li>The component loads characters on initialization</li>
+<li>The pagination information is correctly updated</li>
+<li>Page changes trigger new API calls with the correct parameters</li>
+</ol>
 <h2>Cosmic Compiler Summary</h2>
 <ul>
 <li>We've <strong>transitioned from cards to a MatTable</strong> for a more structured data display</li>
 <li>We've <strong>added MatPaginator</strong> to enable navigation through large datasets</li>
 <li>We've <strong>updated our DataSource</strong> to handle pagination properly with dynamic page sizes</li>
-<li>We've <strong>enhanced our StarWarsService</strong> to accept page size parameters</li>
-<li>We've <strong>implemented reactive page size tracking</strong> with BehaviorSubjects</li>
-<li>We've <strong>handled the conversion</strong> between 0-based and 1-based pagination</li>
-<li>We've <strong>managed loading states</strong> to provide feedback during page transitions</li>
+<li>We've <strong>enhanced our StarWarsService</strong> to accept page and limit parameters</li>
+<li>We've <strong>implemented reactive state tracking</strong> with multiple BehaviorSubjects for characters, loading state, count, page, and page size</li>
+<li>We've <strong>handled the conversion</strong> between 0-based UI pagination and 1-based API pagination</li>
+<li>We've <strong>managed loading states</strong> to provide feedback during page transitions with different spinner placements</li>
 <li>We've <strong>added proper error handling</strong> to gracefully handle API failures</li>
+<li>We've <strong>implemented proper subscription management</strong> to prevent memory leaks</li>
+<li>We've <strong>added data-testid attributes</strong> to improve testability</li>
 </ul>
 <blockquote>
 <p>The Council of Patterns once decreed: &quot;A table without pagination is merely a list with delusions of grandeur.&quot; The Cosmic Compiler, ever the enforcer of good practices, has been known to mysteriously increase build times for applications that ignore this wisdom.</p>
 </blockquote>
-<p><em>In our next transmission, we'll enhance our table further by adding sorting capabilities. We'll implement client-side sorting for our data, allowing users to organize the Galactic Archives by various attributes like name, height, or birth year. The Ancient Order of Angular teaches that a well-organized archive is the mark of a civilized application.</em></p>
-<p><em>May your tables be paginated and your users never reach the dreaded &quot;page 404&quot;.</em></p>
+<p><em>In our next transmission, we'll enhance our table further by adding sorting capabilities. We'll implement sorting for our data, allowing users to organize the Galactic Archives by various attributes like name, height, or birth year. We'll explore both client-side and server-side sorting approaches and discuss the trade-offs. The Ancient Order of Angular teaches that a well-organized archive is the mark of a civilized application.</em></p>
+<p><em>Remember that the full source code for this project is available in the Galactic Archives repository. The Council of Patterns recommends studying the implementation details, particularly how we've structured the DataSource class to handle both pagination and upcoming sorting functionality.</em></p>
+<p><em>May your tables be paginated, your data sources be clean, and your users never reach the dreaded &quot;page 404&quot;.</em></p>
 
   </article>
   
@@ -536,8 +691,8 @@ Now let's look at the template where most of the magic happens:
       <p>
         <a href="/musings/post-7-datasource-foundation/">← Previous</a>
         
- |         <a href="/musings/galactic-archives-series/">Series Overview</a>
         
+ |         <a href="/musings/post-9-adding-sorting/">Next →</a>
       </p>
     </div>
     

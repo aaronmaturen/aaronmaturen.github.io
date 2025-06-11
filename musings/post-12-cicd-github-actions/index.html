@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Setting up automated builds, testing, and deployment with GitHub Actions to publish our Angular app to GitHub Pages" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Galactic Archives - CI/CD with GitHub Actions and GitHub Pages</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <a href="/musings">Musings</a>
+        </li>
+        <li>
+            <span aria-current="page">Post 12 cicd github actions</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Galactic Archives - CI/CD with GitHub Actions and GitHub Pages</h1>
+  <p class="subtitle">June 12, 2025</p>
+  
+  <p class="code-links">
+    <a href="https://github.com/aaronmaturen/galactic-archives/tree/post-12" target="_blank" rel="noopener">View on GitHub</a> | 
+    <a href="https://stackblitz.com/fork/github/aaronmaturen/galactic-archives/tree/post-12" target="_blank" rel="noopener">Run on StackBlitz</a>
+  </p>
+</header>
+
+<main>
+  <article>
+    <h1>Angular DataSource with SWAPI: Building the Galactic Archives - CI/CD with GitHub Actions and GitHub Pages</h1>
+<p><em>In the ever-evolving landscape of the Angular galaxy, manual deployments are like piloting a starship with your eyes closed—technically possible, but prone to disaster. The Ancient Order of Angular teaches us that automation is not just a convenience but a necessity for maintaining order in the chaos of development.</em></p>
+<blockquote>
+<p>&quot;The mark of a true Jedi developer,&quot; whispers the Cosmic Compiler, &quot;is not how many lines of code they write, but how many processes they automate.&quot; A junior developer once asked why automation was so important. The Compiler simply replied, &quot;Because humans make mistakes. Machines make the same mistakes consistently, which is ironically more reliable.&quot;</p>
+</blockquote>
+<h2>The Path to Continuous Integration and Deployment</h2>
+<p>With our Galactic Archives application optimized and ready for production, we now need to establish a reliable pipeline for continuous integration and deployment. This ensures that:</p>
+<ol>
+<li>Every code change is automatically tested</li>
+<li>Code quality standards are enforced</li>
+<li>Successful builds are automatically deployed</li>
+<li>The team is immediately notified of any issues</li>
+</ol>
+<p>In this transmission, we'll set up a complete CI/CD pipeline using GitHub Actions and deploy our application to GitHub Pages.</p>
+<h2>Setting Up GitHub Actions for CI</h2>
+<p>GitHub Actions allows us to create automated workflows triggered by repository events like pushes or pull requests. Let's create our first workflow for continuous integration.</p>
+<h3>Creating the Workflow File</h3>
+<p>First, we need to create a workflow file in the <code>.github/workflows</code> directory:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">mkdir</span> <span class="token parameter variable">-p</span> .github/workflows</code></pre>
+<p>Now, let's create our CI workflow file:</p>
+<pre class="language-yaml"><code class="language-yaml"><span class="token comment"># .github/workflows/ci.yml</span>
+<span class="token key atrule">name</span><span class="token punctuation">:</span> CI
+
+<span class="token key atrule">on</span><span class="token punctuation">:</span>
+  <span class="token key atrule">push</span><span class="token punctuation">:</span>
+    <span class="token key atrule">branches</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>main<span class="token punctuation">]</span>
+  <span class="token key atrule">pull_request</span><span class="token punctuation">:</span>
+    <span class="token key atrule">branches</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>main<span class="token punctuation">]</span>
+
+<span class="token key atrule">jobs</span><span class="token punctuation">:</span>
+  <span class="token key atrule">build</span><span class="token punctuation">:</span>
+    <span class="token key atrule">runs-on</span><span class="token punctuation">:</span> ubuntu<span class="token punctuation">-</span>latest
+
+    <span class="token key atrule">steps</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">uses</span><span class="token punctuation">:</span> actions/checkout@v3
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Setup Node.js
+        <span class="token key atrule">uses</span><span class="token punctuation">:</span> actions/setup<span class="token punctuation">-</span>node@v3
+        <span class="token key atrule">with</span><span class="token punctuation">:</span>
+          <span class="token key atrule">node-version</span><span class="token punctuation">:</span> <span class="token string">"18"</span>
+          <span class="token key atrule">cache</span><span class="token punctuation">:</span> <span class="token string">"npm"</span>
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Install dependencies
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npm ci
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Lint
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npm run lint
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Unit Tests
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npm test <span class="token punctuation">-</span><span class="token punctuation">-</span> <span class="token punctuation">-</span><span class="token punctuation">-</span>no<span class="token punctuation">-</span>watch <span class="token punctuation">-</span><span class="token punctuation">-</span>no<span class="token punctuation">-</span>progress <span class="token punctuation">-</span><span class="token punctuation">-</span>browsers=ChromeHeadless
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Install Playwright Browsers
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npx playwright install <span class="token punctuation">-</span><span class="token punctuation">-</span>with<span class="token punctuation">-</span>deps
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> E2E Tests
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npx playwright test <span class="token punctuation">-</span><span class="token punctuation">-</span>reporter=list <span class="token punctuation">-</span><span class="token punctuation">-</span>quiet
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Build
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npm run build</code></pre>
+<p>This workflow will:</p>
+<ol>
+<li>Trigger on pushes to the main branch or pull requests targeting main</li>
+<li>Set up a Node.js environment</li>
+<li>Install dependencies</li>
+<li>Run linting checks</li>
+<li>Execute unit tests with Jest</li>
+<li>Install Playwright browsers and run E2E tests</li>
+<li>Build the application</li>
+</ol>
+<h3>Configuring Jest for CI</h3>
+<p>Since we're using Jest for testing, we need to make sure it's properly configured for the CI environment. Let's update our Jest configuration:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// jest.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">preset</span><span class="token operator">:</span> <span class="token string">"jest-preset-angular"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">setupFilesAfterEnv</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"&lt;rootDir>/setup-jest.ts"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">globalSetup</span><span class="token operator">:</span> <span class="token string">"jest-preset-angular/global-setup"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">testPathIgnorePatterns</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"/node_modules/"</span><span class="token punctuation">,</span> <span class="token string">"/dist/"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">coverageReporters</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"text"</span><span class="token punctuation">,</span> <span class="token string">"lcov"</span><span class="token punctuation">,</span> <span class="token string">"clover"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">coverageDirectory</span><span class="token operator">:</span> <span class="token string">"coverage"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">collectCoverageFrom</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token string">"src/app/**/*.ts"</span><span class="token punctuation">,</span>
+    <span class="token string">"!src/app/**/*.module.ts"</span><span class="token punctuation">,</span>
+    <span class="token string">"!src/app/**/*.spec.ts"</span><span class="token punctuation">,</span>
+    <span class="token string">"!src/app/environments/**"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">reporters</span><span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">CI</span>
+    <span class="token operator">?</span> <span class="token punctuation">[</span><span class="token string">"default"</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">"jest-junit"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">outputDirectory</span><span class="token operator">:</span> <span class="token string">"test-results"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+    <span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"default"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span></code></pre>
+<p>We'll also need to install the Jest JUnit reporter:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> --save-dev jest-junit</code></pre>
+<p>The Jest JUnit reporter is essential for CI environments because it generates test results in JUnit XML format, which GitHub Actions and other CI systems can parse to display detailed test reports. This helps with:</p>
+<ol>
+<li>Visualizing test results directly in the GitHub Actions UI</li>
+<li>Tracking test failures over time</li>
+<li>Providing detailed error information when tests fail</li>
+<li>Enabling historical test performance analysis</li>
+</ol>
+<h3>Running ESLint and Prettier Checks</h3>
+<p>To ensure code quality, we'll run ESLint and Prettier checks in our CI pipeline. Since we already have ESLint and Prettier configured in our project, we just need to make sure the lint script is executed as part of our CI workflow.</p>
+<p>Our existing <code>package.json</code> already includes the necessary lint scripts:</p>
+<pre class="language-json"><code class="language-json"><span class="token property">"scripts"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+  <span class="token property">"lint"</span><span class="token operator">:</span> <span class="token string">"ng lint &amp;&amp; prettier --check \"src/**/*.{ts,html,scss}\""</span><span class="token punctuation">,</span>
+  <span class="token property">"lint:fix"</span><span class="token operator">:</span> <span class="token string">"ng lint --fix &amp;&amp; prettier --write \"src/**/*.{ts,html,scss}\""</span>
+<span class="token punctuation">}</span></code></pre>
+<p>The CI workflow will use the <code>lint</code> script to check for code style issues without automatically fixing them.</p>
+<h2>Implementing Automated Deployment to GitHub Pages</h2>
+<p>Now that our CI pipeline is set up, let's configure automated deployment to GitHub Pages.</p>
+<h3>Configuring Angular for GitHub Pages</h3>
+<p>First, we need to update our Angular configuration to work with GitHub Pages. Let's modify the <code>angular.json</code> file:</p>
+<pre class="language-json"><code class="language-json"><span class="token property">"architect"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+  <span class="token property">"build"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"configurations"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"production"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property">"baseHref"</span><span class="token operator">:</span> <span class="token string">"/galactic-archives/"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+<p>We should also update our <code>package.json</code> file to include homepage and documentation URLs:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"galactic-archives"</span><span class="token punctuation">,</span>
+  <span class="token property">"version"</span><span class="token operator">:</span> <span class="token string">"0.0.0"</span><span class="token punctuation">,</span>
+  <span class="token property">"homepage"</span><span class="token operator">:</span> <span class="token string">"https://aaronmaturen.com/galactic-archives/"</span><span class="token punctuation">,</span>
+  <span class="token property">"documentation"</span><span class="token operator">:</span> <span class="token string">"https://aaronmaturen.com/musings/galactic-archives-series/"</span>
+  <span class="token comment">// rest of package.json</span>
+<span class="token punctuation">}</span></code></pre>
+<p>These fields provide metadata about where the application is hosted and where its documentation can be found, which is useful for tools and developers working with the project.</p>
+<h3>Creating the Deployment Workflow</h3>
+<p>Now, let's create a separate workflow file for deployment:</p>
+<pre class="language-yaml"><code class="language-yaml"><span class="token comment"># .github/workflows/deploy.yml</span>
+<span class="token key atrule">name</span><span class="token punctuation">:</span> Deploy to GitHub Pages
+
+<span class="token key atrule">on</span><span class="token punctuation">:</span>
+  <span class="token key atrule">push</span><span class="token punctuation">:</span>
+    <span class="token key atrule">branches</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>main<span class="token punctuation">]</span>
+  <span class="token key atrule">workflow_dispatch</span><span class="token punctuation">:</span>
+
+<span class="token key atrule">permissions</span><span class="token punctuation">:</span>
+  <span class="token key atrule">contents</span><span class="token punctuation">:</span> write
+
+<span class="token key atrule">jobs</span><span class="token punctuation">:</span>
+  <span class="token key atrule">build-and-deploy</span><span class="token punctuation">:</span>
+    <span class="token key atrule">runs-on</span><span class="token punctuation">:</span> ubuntu<span class="token punctuation">-</span>latest
+
+    <span class="token key atrule">steps</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">uses</span><span class="token punctuation">:</span> actions/checkout@v3
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Setup Node.js
+        <span class="token key atrule">uses</span><span class="token punctuation">:</span> actions/setup<span class="token punctuation">-</span>node@v3
+        <span class="token key atrule">with</span><span class="token punctuation">:</span>
+          <span class="token key atrule">node-version</span><span class="token punctuation">:</span> <span class="token string">"18"</span>
+          <span class="token key atrule">cache</span><span class="token punctuation">:</span> <span class="token string">"npm"</span>
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Install dependencies
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npm ci
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Build
+        <span class="token key atrule">run</span><span class="token punctuation">:</span> npm run build <span class="token punctuation">-</span><span class="token punctuation">-</span> <span class="token punctuation">-</span><span class="token punctuation">-</span>configuration production <span class="token punctuation">-</span><span class="token punctuation">-</span>base<span class="token punctuation">-</span>href=/galactic<span class="token punctuation">-</span>archives/
+
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> Deploy to GitHub Pages
+        <span class="token key atrule">uses</span><span class="token punctuation">:</span> JamesIves/github<span class="token punctuation">-</span>pages<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span>action@v4
+        <span class="token key atrule">with</span><span class="token punctuation">:</span>
+          <span class="token key atrule">folder</span><span class="token punctuation">:</span> dist/galactic<span class="token punctuation">-</span>archives/browser
+          <span class="token key atrule">branch</span><span class="token punctuation">:</span> gh<span class="token punctuation">-</span>pages
+          <span class="token key atrule">token</span><span class="token punctuation">:</span> $</code></pre>
+<p>This workflow will:</p>
+<ol>
+<li>Trigger on pushes to the main branch or manual dispatch</li>
+<li>Set up a Node.js environment</li>
+<li>Install dependencies</li>
+<li>Build the application with production configuration</li>
+<li>Deploy the built files to the gh-pages branch</li>
+</ol>
+<p>Note the <code>permissions</code> section is crucial - it gives the GitHub Actions workflow write access to your repository contents. Without this, the deployment will fail with a 403 error because the default <code>GITHUB_TOKEN</code> doesn't have permission to push to your repository.</p>
+<h3>Adding Build Badges</h3>
+<p>Build badges provide quick visual feedback on the status of our CI/CD pipelines. Let's add them to our README.md:</p>
+<pre class="language-markdown"><code class="language-markdown"><span class="token title important"><span class="token punctuation">#</span> Angular DataSource with SWAPI: Building the Galactic Archives</span>
+
+<span class="token url"><span class="token operator">!</span>[<span class="token content">CI</span>](<span class="token url">https://github.com/aaronmaturen/galactic-archives/workflows/CI/badge.svg</span>)</span>
+<span class="token url"><span class="token operator">!</span>[<span class="token content">Deploy</span>](<span class="token url">https://github.com/aaronmaturen/galactic-archives/workflows/Deploy%20to%20GitHub%20Pages/badge.svg</span>)</span></code></pre>
+<h2>Implementing Branch Protection Rules</h2>
+<p>To ensure our CI/CD pipeline is effective, we should set up branch protection rules in GitHub:</p>
+<ol>
+<li>Go to your repository settings</li>
+<li>Navigate to Branches &gt; Branch protection rules</li>
+<li>Add a rule for the main branch</li>
+<li>Enable the following options:
+<ul>
+<li>Require status checks to pass before merging</li>
+<li>Require branches to be up to date before merging</li>
+<li>Select the CI workflow as a required status check</li>
+<li>Require pull request reviews before merging</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>&quot;Branch protection,&quot; the Cosmic Compiler notes with approval, &quot;is like the blast doors on a Star Destroyer—preventing unauthorized or untested code from entering critical systems.&quot;</p>
+</blockquote>
+<h2>Cosmic Compiler Summary</h2>
+<ul>
+<li>We've <strong>set up GitHub Actions workflows</strong> for continuous integration</li>
+<li>We've <strong>configured automated testing</strong> with Jest and Playwfright in our CI pipeline</li>
+<li>We've <strong>implemented code quality checks</strong> with ESLint and Prettier</li>
+<li>We've <strong>automated deployment</strong> to GitHub Pages</li>
+<li>We've <strong>added build badges</strong> for workflow status</li>
+<li>We've <strong>configured branch protection rules</strong> to enforce quality standards</li>
+</ul>
+<p><em>With our CI/CD pipeline in place, our Galactic Archives application is now fully automated—from code commit to production deployment. The Ancient Order of Angular would be proud of our commitment to quality and automation.</em></p>
+<p><em>As we conclude our journey through the Angular galaxy, remember that the path of a developer is one of continuous learning and improvement. The techniques and patterns we've explored are but a fraction of what's possible with Angular.</em></p>
+<p><em>May your builds always be green, your tests always pass, and your deployments always succeed.</em></p>
+
+  </article>
+  
+  <section>
+    <hr>
+    
+    <div class="series-navigation">
+      
+      <p>
+        <a href="/musings/post-11-star-wars-theming/">← Previous</a>
+        
+        
+      </p>
+    </div>
+    
+    <div class="post-footer">
+      <p><a href="/musings/">← Back to all musings</a></p>
+      
+    </div>
+  </section>
+</main>
+
+    </article>
+  </body>
+</html>

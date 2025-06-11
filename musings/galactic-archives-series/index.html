@@ -29,7 +29,7 @@
         
 <header>
   <h1>Galactic Archives Series</h1>
-  <p class="subtitle">June 8, 2025</p>
+  <p class="subtitle">June 1, 2025</p>
   
 </header>
 
@@ -38,6 +38,8 @@
     <h1>Galactic Archives Series</h1>
 <p><em>A comprehensive guide to building efficient data sources in Angular using the Star Wars API.</em></p>
 <p>This series explores advanced patterns for handling paginated data in Angular applications. Using the Star Wars API (SWAPI) as our data source, we'll build a robust, reusable solution for displaying and navigating large datasets.</p>
+<p><strong>Live Demo:</strong> <a href="https://aaronmaturen.com/galactic-archives/">https://aaronmaturen.com/galactic-archives/</a></p>
+<p><strong>Source Code:</strong> <a href="https://github.com/aaronmaturen/galactic-archives">github.com/aaronmaturen/galactic-archives</a></p>
 <h2>What You'll Learn</h2>
 <ul>
 <li>Creating custom data sources in Angular</li>
@@ -48,39 +50,29 @@
 </ul>
 <h2>Table of Contents</h2>
 <h3>Foundation Phase</h3>
-<ol>
+<ol start="0">
 <li><a href="/musings/post-0-introduction/">Introduction</a> - Introduces the DataSource pattern concept and outlines the plan to build a Star Wars data explorer application called &quot;Galactic Archives&quot;</li>
-<li><a href="/musings/post-1-basic-project-setup/">Basic Project Setup</a> - Creates the Angular v18 project with standalone components, sets up Angular Material and Tailwind CSS with <code>tw-</code> prefix, and implements a basic app shell</li>
-<li><a href="/musings/post-2-code-quality-setup/">Code Quality Setup</a> - Implements Husky and lint-staged for pre-commit hooks to ensure code quality</li>
-<li><a href="/musings/post-3-testing-setup/">Testing Setup</a> - Configures Jest for unit/integration testing and Playwright for E2E testing</li>
+<li><a href="/musings/post-1-basic-project-setup/">Basic Project Setup</a> - Creates the Angular project with standalone components, sets up Angular Material and Tailwind CSS with <code>tw-</code> prefix</li>
+<li><a href="/musings/post-2-code-quality-setup/">Code Quality Setup</a> - Implements ESLint, Prettier, and Husky pre-commit hooks to ensure consistent code style</li>
+<li><a href="/musings/post-3-testing-setup/">Testing Setup</a> - Configures Jest for unit testing and Playwright for E2E testing with CI integration</li>
 </ol>
 <h3>Architecture Phase</h3>
-<ol start="5">
-<li><a href="/musings/post-4-feature-based-architecture/">Feature-Based Architecture</a> - Reorganizes the application using a feature-based architecture with core, features, shared, and models directories</li>
-<li><a href="/musings/post-5-star-wars-api-service/">Star Wars API Service</a> - Implements the StarWarsService to interact with the SWAPI API</li>
-<li><a href="/musings/post-6-api-mocking-with-msw/">API Mocking with MSW</a> - Sets up Mock Service Worker for API mocking during development and testing</li>
+<ol start="4">
+<li><a href="/musings/post-4-feature-based-architecture/">Feature-Based Architecture</a> - Organizes the application using feature modules, smart/dumb component patterns, and lazy loading</li>
+<li><a href="/musings/post-5-star-wars-api-service/">Star Wars API Service</a> - Builds a robust HTTP client service with TypeScript interfaces for SWAPI endpoints</li>
+<li><a href="/musings/post-6-api-mocking-msw/">API Mocking with MSW</a> - Sets up Mock Service Worker to intercept and mock SWAPI requests for reliable testing</li>
 </ol>
 <h3>Core DataSource Implementation Phase</h3>
-<ol start="8">
-<li><a href="/musings/post-7-datasource-foundation/">DataSource Foundation</a> - Implements the core GalacticDataSource class extending Angular's DataSource</li>
-<li><a href="/musings/post-8-implementing-pagination/">Implementing Pagination</a> - Adds pagination to the DataSource and implements MatTable with MatPaginator</li>
-<li><a href="/musings/post-9-adding-sorting/">Adding Sorting</a> - Enhances the DataSource with sorting capabilities using MatSort</li>
-<li><a href="/musings/post-10-implementing-filtering/">Implementing Filtering</a> - Adds filtering functionality to the DataSource with debouncing</li>
+<ol start="7">
+<li><a href="/musings/post-7-datasource-foundation/">DataSource Foundation</a> - Creates a custom Angular DataSource implementation with reactive state management</li>
+<li><a href="/musings/post-8-implementing-pagination/">Implementing Pagination</a> - Adds client and server-side pagination with infinite scrolling for large datasets</li>
+<li><a href="/musings/post-9-adding-sorting/">Adding Sorting</a> - Implements multi-column sorting with custom comparators for complex data types</li>
+<li><a href="/musings/post-10-implementing-filtering/">Implementing Filtering</a> - Builds advanced search filters with dynamic query parameters for Star Wars data</li>
 </ol>
-<h3>UI Enhancement Phase</h3>
-<ol start="12">
-<li><a href="/musings/post-11-star-wars-theming/">Star Wars Theming</a> - Customizes the Angular Material theme with Star Wars-inspired colors</li>
-<li><a href="/musings/post-12-responsive-design/">Responsive Design</a> - Makes the application fully responsive across different device sizes</li>
-<li><a href="/musings/post-13-keyboard-navigation/">Keyboard Navigation</a> - Improves accessibility with keyboard navigation support</li>
-<li><a href="/musings/post-14-high-contrast-mode/">High Contrast Mode</a> - Adds support for high contrast mode for visually impaired users</li>
-<li><a href="/musings/post-15-loading-states-and-ux/">Loading States and UX</a> - Enhances user experience with better loading states and indicators</li>
-</ol>
-<h3>Testing and Deployment Phase</h3>
-<ol start="17">
-<li><a href="/musings/post-16-testing-datasource/">Testing DataSource</a> - Implements comprehensive tests for the DataSource using Jest and MSW</li>
-<li><a href="/musings/post-17-deployment-optimization/">Deployment Optimization</a> - Optimizes the application for production with bundle analysis, service worker implementation, and advanced caching</li>
-<li><a href="/musings/post-18-cicd-with-github-actions/">CI/CD with GitHub Actions</a> - Sets up continuous integration and deployment pipelines</li>
-<li><a href="/musings/post-19-future-directions/">Future Directions and Advanced Patterns</a> - Explores hypothetical improvements including Angular Signals, NgRx integration, advanced caching strategies, and performance optimizations</li>
+<h3>UI Enhancement &amp; Deployment Phase</h3>
+<ol start="11">
+<li><a href="/musings/post-11-star-wars-theming/">Star Wars Theming</a> - Implements custom Star Wars UI elements, dark mode, and performance optimizations</li>
+<li><a href="/musings/post-12-cicd-github-actions/">CI/CD with GitHub Actions</a> - Sets up automated builds, testing, and deployment to GitHub Pages</li>
 </ol>
 <h2>Prerequisites</h2>
 <ul>
@@ -101,7 +93,6 @@
       
       <p>
         
-        <a href="/musings/galactic-archives-series/">Series Overview</a>
         
       </p>
     </div>
@@ -110,7 +101,7 @@
       <p><a href="/musings/">← Back to all musings</a></p>
       
       <p class="github-links">
-        <a href="https://github.com/aaronmaturen/galactic-archive" target="_blank" rel="noopener">View on GitHub</a>
+        <a href="https://github.com/aaronmaturen/galactic-archives" target="_blank" rel="noopener">View on GitHub</a>
       </p>
     </div>
   </section>
