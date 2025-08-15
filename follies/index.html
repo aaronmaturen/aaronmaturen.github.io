@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Aaron T. Maturen - Web Developer" />
+    <link rel="shortcut icon" href="/assets/ico/favicon.ico" />
+    <title>Follies | Aaron T. Maturen</title>
+    <link rel="stylesheet" href="/assets/css/tufte.min.css" />
+    <link rel="stylesheet" href="/assets/css/prism-theme.css" />
+    <link rel="stylesheet" href="/assets/css/custom.css" />
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="Aaron T. Maturen's Musings" />
+  </head>
+  <body>
+    <article>
+
+<nav class="tw-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="/" aria-label="Home">Home</a>
+    </li>
+        <li>
+            <span aria-current="page">Follies</span>
+        </li>
+  </ol>
+</nav>
+        
+<header>
+  <h1>Follies</h1>
+  <p class="subtitle">Digital experiments in the art of getting things wonderfully wrong</p>
+
+  <blockquote class="folly-intro">
+    <p>A folly, is a building constructed primarily for decoration, but suggesting through its appearance some other purpose. These digital follies, like their 18th-century architectural namesakes, serve no particular purpose other than to exist, perplex, and occasionally delight. They are monuments to curiosity, testaments to the dangerous question "what if?", and proof that not all code needs to solve a problem; sometimes it just needs to be.</p>
+    <p>Each one started sensibly enough, as these things do, before wandering off into the digital wilderness armed with nothing but good intentions and a dangerous amount of curiosity. They are, in essence, the coding equivalent of building a fake Roman ruin in your backyard. </p>
+    <p>Utterly unnecessary, slightly ridiculous, but somehow exactly what the universe needed.</p>
+  </blockquote>
+</header>
+
+<main>
+  <section class="follies">
+    <div class="project-grid">
+      <article class="project">
+        <h2><a href="https://painlessrecipes.com">Painless Recipes</a></h2>
+        <p>A collection of simple, easy-to-follow recipes for everyday cooking. Without worry for SEO or telling you that their grandma is the best cook in the world.</p>
+        <p class="project-links">
+          <a href="https://painlessrecipes.com">Visit Site</a> &bull;
+          <a href="https://github.com/aaronmaturen/painless-recipes">GitHub</a>
+        </p>
+      </article>
+
+      <article class="project">
+        <h2><a href="https://monoblocks.aaronmaturen.com">Monoblocks</a></h2>
+        <p>A minimalist block-based ascii editor to compete with the powerhouses of the world such as figma.</p>
+        <p class="project-links">
+          <a href="https://monoblocks.aaronmaturen.com">Visit Site</a> &bull;
+          <a href="https://github.com/aaronmaturen/monoblocks">GitHub</a>
+        </p>
+      </article>
+
+      <article class="project">
+        <h2><a href="https://aaronmaturen.com/galactic-archives">Galactic Archives</a></h2>
+        <p>An interactive space exploration and documentation project.</p>
+        <p class="project-links">
+          <a href="https://aaronmaturen.com/galactic-archives">Visit Site</a> &bull;
+          <a href="https://github.com/aaronmaturen/galactic-archives">GitHub</a>
+        </p>
+      </article>
+
+      <article class="project">
+        <h2><a href="https://aaronmaturen.com/matchlet/">Matchlet</a></h2>
+        <p>A real-time multiplayer matching game.</p>
+        <p class="project-links">
+          <a href="https://aaronmaturen.com/matchlet/">Visit Site</a> &bull;
+          <a href="https://github.com/aaronmaturen/matchlet">GitHub</a>
+        </p>
+      </article>
+
+      <article class="project">
+        <h2><a href="https://nes-github-725f.fly.dev/login">NES GitHub</a></h2>
+        <p>A retro-styled GitHub interface inspired by classic 8-bit aesthetics.</p>
+        <p class="project-links">
+          <a href="https://nes-github-725f.fly.dev/login">Visit Site</a> &bull;
+          <a href="https://github.com/aaronmaturen/nes-github">GitHub</a>
+        </p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<style>
+  .folly-intro {
+    margin: 2rem 0 3rem;
+    padding: 1.5rem;
+    border-left: 4px solid #0066cc;
+    background: rgba(0, 102, 204, 0.05);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .folly-intro p {
+    margin: 0 0 1rem;
+  }
+
+  .folly-intro p:last-child {
+    margin-bottom: 0;
+  }
+
+  .follies {
+    margin: 2rem 0;
+  }
+
+  .project-grid {
+    display: grid;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .project {
+    padding: 1rem !important;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+
+  .project h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .project h2 a {
+    color: #333;
+    text-decoration: none;
+  }
+
+  .project h2 a:hover {
+    color: #0066cc;
+    text-decoration: underline;
+  }
+
+  .project p {
+    margin: 0.5rem 0;
+    color: #666;
+  }
+
+  .project-links {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .project-links a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+
+  .project-links a:hover {
+    text-decoration: underline;
+  }
+
+  @media (min-width: 768px) {
+    .project-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .project-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .folly-intro {
+      background: rgba(102, 179, 255, 0.1);
+      border-left-color: #66b3ff;
+    }
+    .project {
+      background: #1a1a1a;
+      border-color: #333;
+    }
+
+    .project h2 a {
+      color: #e0e0e0;
+    }
+
+    .project h2 a:hover {
+      color: #66b3ff;
+    }
+
+    .project p {
+      color: #999;
+    }
+
+    .project-links a {
+      color: #66b3ff;
+    }
+  }
+</style>
+
+    </article>
+  </body>
+</html>
